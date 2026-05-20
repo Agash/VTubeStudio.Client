@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+    <PackageId>VTubeStudio.Client.DependencyInjection</PackageId>
+    <Title>VTubeStudio.Client.DependencyInjection</Title>
+    <Description>DI extensions for VTubeStudio.Client. Registers the client and its options in Microsoft.Extensions.DependencyInjection.</Description>
+    <PackageTags>vtubestudio;client;di;ioc</PackageTags>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VTubeStudio.Client\VTubeStudio.Client.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+    <PackageReference Include="DotNet.ReproducibleBuilds" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

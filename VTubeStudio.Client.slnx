@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/VTubeStudio.Client.Sample/VTubeStudio.Client.Sample.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/VTubeStudio.Client/VTubeStudio.Client.csproj" />
+    <Project Path="src/VTubeStudio.Client.DependencyInjection/VTubeStudio.Client.DependencyInjection.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/VTubeStudio.Client.Tests/VTubeStudio.Client.Tests.csproj" />
+  </Folder>
+</Solution>

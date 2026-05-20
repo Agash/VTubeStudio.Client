@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: VTube Studio API documentation
+    url: https://github.com/DenchiSoft/VTubeStudio
+    about: For questions about the underlying protocol itself, please refer to DenchiSoft's repo.

@@ -1,0 +1,25 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <Authors>Agash</Authors>
+    <Company>Agash</Company>
+    <Copyright>Copyright (c) Agash 2026</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/Agash/VTubeStudio.Client</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Agash/VTubeStudio.Client</PackageProjectUrl>
+    <GenerateDocumentationFile Condition="'$(IsPackable)' == 'true'">true</GenerateDocumentationFile>
+    <PackageReadmeFile Condition="'$(IsPackable)' == 'true'">README.md</PackageReadmeFile>
+    <!-- Treat missing XML docs (CS1591) as errors on packable projects so the published surface is fully documented. -->
+    <WarningsAsErrors Condition="'$(IsPackable)' == 'true'">$(WarningsAsErrors);CS1591</WarningsAsErrors>
+  </PropertyGroup>
+</Project>
