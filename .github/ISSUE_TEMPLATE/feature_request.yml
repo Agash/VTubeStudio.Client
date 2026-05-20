@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose a new capability or enhancement to the library.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: What problem are you trying to solve? What does your plugin/app need to do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API or behaviour
+      description: A sketch of the surface — method signatures, sample call site, expected outcome.
+      render: csharp
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workarounds exist today and why aren't they sufficient?

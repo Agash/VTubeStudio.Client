@@ -1,35 +1,52 @@
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+using VTubeStudio.Client.Serialization;
 
 namespace VTubeStudio.Client.Events;
 
-public sealed record ModelLoadedEventPayload
+public sealed record ModelLoadedEventPayload : IVTubeStudioEvent<ModelLoadedEventPayload>
 {
+    public static string EventName => VTubeStudioEventNames.ModelLoaded;
+    public static JsonTypeInfo<ModelLoadedEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.ModelLoadedEventPayload;
+
     [JsonPropertyName("modelLoaded")] public bool ModelLoaded { get; init; }
     [JsonPropertyName("modelName")] public string? ModelName { get; init; }
     [JsonPropertyName("modelID")] public string? ModelId { get; init; }
 }
 
-public sealed record TrackingStatusChangedEventPayload
+public sealed record TrackingStatusChangedEventPayload : IVTubeStudioEvent<TrackingStatusChangedEventPayload>
 {
+    public static string EventName => VTubeStudioEventNames.TrackingStatusChanged;
+    public static JsonTypeInfo<TrackingStatusChangedEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.TrackingStatusChangedEventPayload;
+
     [JsonPropertyName("faceFound")] public bool FaceFound { get; init; }
     [JsonPropertyName("leftHandFound")] public bool LeftHandFound { get; init; }
     [JsonPropertyName("rightHandFound")] public bool RightHandFound { get; init; }
 }
 
-public sealed record BackgroundChangedEventPayload
+public sealed record BackgroundChangedEventPayload : IVTubeStudioEvent<BackgroundChangedEventPayload>
 {
+    public static string EventName => VTubeStudioEventNames.BackgroundChanged;
+    public static JsonTypeInfo<BackgroundChangedEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.BackgroundChangedEventPayload;
+
     [JsonPropertyName("backgroundName")] public required string BackgroundName { get; init; }
 }
 
-public sealed record ModelConfigChangedEventPayload
+public sealed record ModelConfigChangedEventPayload : IVTubeStudioEvent<ModelConfigChangedEventPayload>
 {
+    public static string EventName => VTubeStudioEventNames.ModelConfigChanged;
+    public static JsonTypeInfo<ModelConfigChangedEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.ModelConfigChangedEventPayload;
+
     [JsonPropertyName("modelID")] public string? ModelId { get; init; }
     [JsonPropertyName("modelName")] public string? ModelName { get; init; }
     [JsonPropertyName("hotkeyConfigChanged")] public bool HotkeyConfigChanged { get; init; }
 }
 
-public sealed record ModelMovedEventPayload
+public sealed record ModelMovedEventPayload : IVTubeStudioEvent<ModelMovedEventPayload>
 {
+    public static string EventName => VTubeStudioEventNames.ModelMoved;
+    public static JsonTypeInfo<ModelMovedEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.ModelMovedEventPayload;
+
     [JsonPropertyName("modelID")] public string? ModelId { get; init; }
     [JsonPropertyName("modelName")] public string? ModelName { get; init; }
     [JsonPropertyName("modelPosition")] public ModelPosition? ModelPosition { get; init; }
@@ -43,8 +60,11 @@ public sealed record ModelPosition
     [JsonPropertyName("rotation")] public double Rotation { get; init; }
 }
 
-public sealed record HotkeyTriggeredEventPayload
+public sealed record HotkeyTriggeredEventPayload : IVTubeStudioEvent<HotkeyTriggeredEventPayload>
 {
+    public static string EventName => VTubeStudioEventNames.HotkeyTriggered;
+    public static JsonTypeInfo<HotkeyTriggeredEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.HotkeyTriggeredEventPayload;
+
     [JsonPropertyName("hotkeyID")] public required string HotkeyId { get; init; }
     [JsonPropertyName("hotkeyName")] public required string HotkeyName { get; init; }
     [JsonPropertyName("hotkeyAction")] public string? HotkeyAction { get; init; }
@@ -55,8 +75,11 @@ public sealed record HotkeyTriggeredEventPayload
     [JsonPropertyName("isLive2DItem")] public bool IsLive2DItem { get; init; }
 }
 
-public sealed record ModelAnimationEventPayload
+public sealed record ModelAnimationEventPayload : IVTubeStudioEvent<ModelAnimationEventPayload>
 {
+    public static string EventName => VTubeStudioEventNames.ModelAnimation;
+    public static JsonTypeInfo<ModelAnimationEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.ModelAnimationEventPayload;
+
     [JsonPropertyName("animationEventType")] public string? AnimationEventType { get; init; }
     [JsonPropertyName("animationEventTime")] public double AnimationEventTime { get; init; }
     [JsonPropertyName("animationEventData")] public string? AnimationEventData { get; init; }
@@ -68,16 +91,22 @@ public sealed record ModelAnimationEventPayload
     [JsonPropertyName("isLive2DItem")] public bool IsLive2DItem { get; init; }
 }
 
-public sealed record ItemEventPayload
+public sealed record ItemEventPayload : IVTubeStudioEvent<ItemEventPayload>
 {
+    public static string EventName => VTubeStudioEventNames.Item;
+    public static JsonTypeInfo<ItemEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.ItemEventPayload;
+
     [JsonPropertyName("itemEventType")] public string? ItemEventType { get; init; }
     [JsonPropertyName("itemInstanceID")] public string? ItemInstanceId { get; init; }
     [JsonPropertyName("itemFileName")] public string? ItemFileName { get; init; }
     [JsonPropertyName("itemPosition")] public ModelPosition? ItemPosition { get; init; }
 }
 
-public sealed record ModelClickedEventPayload
+public sealed record ModelClickedEventPayload : IVTubeStudioEvent<ModelClickedEventPayload>
 {
+    public static string EventName => VTubeStudioEventNames.ModelClicked;
+    public static JsonTypeInfo<ModelClickedEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.ModelClickedEventPayload;
+
     [JsonPropertyName("modelLoaded")] public bool ModelLoaded { get; init; }
     [JsonPropertyName("loadedModelID")] public string? LoadedModelId { get; init; }
     [JsonPropertyName("loadedModelName")] public string? LoadedModelName { get; init; }
@@ -101,8 +130,11 @@ public sealed record WindowSize
     [JsonPropertyName("y")] public int Y { get; init; }
 }
 
-public sealed record PostProcessingEventPayload
+public sealed record PostProcessingEventPayload : IVTubeStudioEvent<PostProcessingEventPayload>
 {
+    public static string EventName => VTubeStudioEventNames.PostProcessing;
+    public static JsonTypeInfo<PostProcessingEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.PostProcessingEventPayload;
+
     [JsonPropertyName("currentOnState")] public bool CurrentOnState { get; init; }
     [JsonPropertyName("currentPreset")] public string? CurrentPreset { get; init; }
 }

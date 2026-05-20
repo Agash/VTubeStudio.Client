@@ -252,6 +252,14 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
         SendAsync(VTubeStudioMessageTypes.ItemUnloadRequest, request,
             VTubeStudioJsonContext.Default.ItemUnloadRequest, VTubeStudioJsonContext.Default.ItemUnloadResponse, _options.RequestTimeout, ct);
 
+    /// <summary>
+    /// Subscribe (or unsubscribe) the current session to a typed event payload. The wire-format
+    /// event name is resolved from the payload type via <see cref="IVTubeStudioEvent{TSelf}"/>.
+    /// </summary>
+    public Task<EventSubscriptionResponse> SubscribeAsync<TPayload>(bool subscribe = true, CancellationToken ct = default)
+        where TPayload : class, IVTubeStudioEvent<TPayload>
+        => SubscribeAsync(TPayload.EventName, subscribe, ct);
+
     /// <summary>Subscribe (or unsubscribe) the current session to a named event without any config.</summary>
     public Task<EventSubscriptionResponse> SubscribeAsync(string eventName, bool subscribe = true, CancellationToken ct = default)
     {
@@ -266,7 +274,7 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
     }
 
     /// <summary>Subscribe to a named event with a typed config record (e.g. <see cref="HotkeyTriggeredEventConfig"/>).</summary>
-    public Task<EventSubscriptionResponse> SubscribeAsync<TConfig>(
+    public Task<EventSubscriptionResponse> SubscribeWithConfigAsync<TConfig>(
         string eventName,
         TConfig config,
         System.Text.Json.Serialization.Metadata.JsonTypeInfo<TConfig> typeInfo,

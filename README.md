@@ -2,10 +2,6 @@
 
 Modern .NET 10 / C# 14 client library for the [VTube Studio Public API](https://github.com/DenchiSoft/VTubeStudio). AOT-friendly, `System.Text.Json` source-generated, fully typed.
 
-## Why another one?
-
-The only existing C# library on NuGet (`VTS-Sharp`, last updated Dec 2023) targets .NET Standard 2.0 and depends on Newtonsoft.Json + WebSocketSharp + WebSocket4Net — reflection-heavy and not AOT/trim compatible. This library is built bottom-up for modern .NET: source-generated `JsonSerializerContext`, AOT-marked, no third-party serializer.
-
 ## Packages
 
 | Package | Purpose |
@@ -19,7 +15,6 @@ The only existing C# library on NuGet (`VTS-Sharp`, last updated Dec 2023) targe
 using VTubeStudio.Client;
 using VTubeStudio.Client.Events;
 using VTubeStudio.Client.Messages;
-using VTubeStudio.Client.Serialization;
 
 await using var client = new VTubeStudioClient(new VTubeStudioClientOptions
 {
@@ -29,9 +24,9 @@ await using var client = new VTubeStudioClient(new VTubeStudioClientOptions
 
 await client.ConnectAsync();
 
-// First run: user approves a popup in VTube Studio and a token is issued.
-// Subsequent runs: pass the persisted token; the client re-authenticates and only
-// re-requests if the stored token was invalidated.
+// First run: VTube Studio prompts the user to approve. On approval the token
+// is returned; persist it so subsequent runs re-authenticate silently. If the
+// stored token is later invalidated, the client re-requests automatically.
 string token = await client.RequestAndAuthenticateAsync(existingToken: null);
 // → persist `token` to your secret store
 
@@ -45,15 +40,12 @@ foreach (AvailableHotkey hk in hotkeys.AvailableHotkeys)
 // Trigger by id
 await client.TriggerHotkeyAsync(new HotkeyTriggerRequest { HotkeyId = hotkeys.AvailableHotkeys[0].HotkeyId });
 
-// Subscribe to typed events
+// Subscribe to typed events — no JsonTypeInfo or event-name string needed.
+// The payload type carries both via IVTubeStudioEvent<TSelf>.
 client.Events.On<HotkeyTriggeredEventPayload>(
-    VTubeStudioEventNames.HotkeyTriggered,
-    e => Console.WriteLine($"hotkey {e.HotkeyName} triggered (by API: {e.HotkeyTriggeredByApi})"),
-    VTubeStudioJsonContext.Default.HotkeyTriggeredEventPayload);
+    e => Console.WriteLine($"hotkey {e.HotkeyName} triggered (by API: {e.HotkeyTriggeredByApi})"));
+await client.SubscribeAsync<HotkeyTriggeredEventPayload>();
 
-await client.SubscribeAsync(VTubeStudioEventNames.HotkeyTriggered);
-
-// Block until the user disconnects
 await Task.Delay(Timeout.InfiniteTimeSpan);
 ```
 
@@ -74,21 +66,30 @@ await vts.ConnectAsync();
 
 ## What's covered
 
-- Session/state: `APIStateRequest`, `StatisticsRequest`, `FaceFoundRequest`
-- Authentication: full token request + session-authenticate two-step flow
-- Models: current model, available models, load, move (with timed interpolation, native to VTS)
+- Session / state: `APIStateRequest`, `StatisticsRequest`, `FaceFoundRequest`
+- Authentication: full token-request + session-authenticate two-step flow handled by one method
+- Models: current model, available models, load, move (with native server-side interpolation)
 - Hotkeys: list, trigger by id (with item-instance scoping)
 - Expressions: state, activate / deactivate
 - Parameters: input + Live2D parameter lists, value query, custom-parameter injection
-- ArtMesh: list, color tint with full `ArtMeshMatcher` semantics
+- ArtMesh: list, color tint with the full `ArtMeshMatcher` semantics
 - Items: list, load, unload (single / by ids / by filename / all-by-plugin)
-- Events: subscribe / unsubscribe + typed config records, typed event hub
+- Events: subscribe / unsubscribe + typed config records, typed event hub via `IVTubeStudioEvent<TSelf>`
 
-Every payload is a real record with `JsonPropertyName` attributes; everything is registered in a single source-generated `JsonSerializerContext` (`VTubeStudioJsonContext`). The library is `IsAotCompatible="true"` and `IsTrimmable="true"`.
+Every payload is a real record with `JsonPropertyName` attributes; everything is registered in a single source-generated `JsonSerializerContext` (`VTubeStudioJsonContext`). The library targets `net10.0` with `IsAotCompatible="true"` and `IsTrimmable="true"`.
 
 ## Sample
 
-`samples/VTubeStudio.Client.Sample/` is a runnable Spectre.Console app that drives the full lifecycle: connect → authenticate → discover resources → trigger hotkeys → subscribe to events → tail event log. Run it against a live VTube Studio instance to see the API in action.
+[`samples/VTubeStudio.Client.Sample/`](samples/VTubeStudio.Client.Sample) is an interactive Spectre.Console app that exercises every public surface — connect, authenticate, model swap, hotkey trigger, expression cycle, item load with auto-unload, ArtMesh tint cycle, model orbit, custom parameter injection, live event tailing. The CI workflow publishes it with `PublishAot=true` and `IsTrimmable=true` as a smoke test that the library stays AOT- and trim-clean.
+
+```
+cd samples/VTubeStudio.Client.Sample
+dotnet run
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for the workflow, [CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md) for community expectations, and [SECURITY.md](.github/SECURITY.md) for vulnerability reporting.
 
 ## License
 
