@@ -22,4 +22,9 @@
     <!-- Treat missing XML docs (CS1591) as errors on packable projects so the published surface is fully documented. -->
     <WarningsAsErrors Condition="'$(IsPackable)' == 'true'">$(WarningsAsErrors);CS1591</WarningsAsErrors>
   </PropertyGroup>
+
+  <!-- Every packable project ships the repo README, so each csproj doesn't repeat itself. -->
+  <ItemGroup Condition="'$(IsPackable)' == 'true'">
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
 </Project>
