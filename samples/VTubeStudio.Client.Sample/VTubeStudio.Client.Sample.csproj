@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>VTubeStudio.Client.Sample</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <!-- Verify the lib is genuinely native-AOT and trim-safe by publishing the sample with both enabled. -->
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\VTubeStudio.Client\VTubeStudio.Client.csproj" />
+    <ProjectReference Include="..\..\src\VTubeStudio.Client.DependencyInjection\VTubeStudio.Client.DependencyInjection.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Spectre.Console" />
+  </ItemGroup>
+</Project>
