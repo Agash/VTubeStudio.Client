@@ -16,7 +16,7 @@ public sealed class SerializationTests
         {
             MessageType = VTubeStudioMessageTypes.HotkeyTriggerRequest,
             RequestId = "abc-123",
-            Data = JsonDocument.Parse("""{"hotkeyID":"X"}""").RootElement.Clone(),
+            Data = JsonElement.Parse("""{"hotkeyID":"X"}"""),
         };
 
         string json = JsonSerializer.Serialize(envelope, VTubeStudioJsonContext.Default.VTubeStudioEnvelope);

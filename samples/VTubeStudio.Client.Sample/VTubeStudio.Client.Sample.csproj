@@ -9,6 +9,8 @@
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Sample app: not shipped; don't gate the build on code-style analyzers. -->
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>

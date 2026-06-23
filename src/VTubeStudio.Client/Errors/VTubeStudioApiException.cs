@@ -5,19 +5,12 @@ namespace VTubeStudio.Client.Errors;
 /// The numeric <see cref="ErrorIdRaw"/> is always preserved even when <see cref="ErrorId"/> is
 /// <see cref="VTubeStudioErrorId.Unknown"/>.
 /// </summary>
-public sealed class VTubeStudioApiException : Exception
+public sealed class VTubeStudioApiException(VTubeStudioErrorId errorId, int errorIdRaw, string apiMessage)
+    : Exception($"[{errorIdRaw}] {apiMessage}")
 {
-    public VTubeStudioApiException(VTubeStudioErrorId errorId, int errorIdRaw, string apiMessage)
-        : base($"[{errorIdRaw}] {apiMessage}")
-    {
-        ErrorId = errorId;
-        ErrorIdRaw = errorIdRaw;
-        ApiMessage = apiMessage;
-    }
+    public VTubeStudioErrorId ErrorId { get; } = errorId;
 
-    public VTubeStudioErrorId ErrorId { get; }
+    public int ErrorIdRaw { get; } = errorIdRaw;
 
-    public int ErrorIdRaw { get; }
-
-    public string ApiMessage { get; }
+    public string ApiMessage { get; } = apiMessage;
 }

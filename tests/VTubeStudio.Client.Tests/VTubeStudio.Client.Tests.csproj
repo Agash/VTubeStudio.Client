@@ -7,6 +7,8 @@
     <OutputType>Exe</OutputType>
     <EnableMSTestRunner>true</EnableMSTestRunner>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- IDE0005 only runs with GenerateDocumentationFile=true (off for tests); suppress. -->
+    <NoWarn>$(NoWarn);IDE0005</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

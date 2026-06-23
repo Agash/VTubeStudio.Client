@@ -37,7 +37,7 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
     private readonly VTubeStudioClientOptions _options;
     private readonly ILogger<VTubeStudioClient> _logger;
     private readonly ConcurrentDictionary<string, TaskCompletionSource<VTubeStudioEnvelope>> _pending = new(StringComparer.Ordinal);
-    private static readonly JsonElement _emptyData = JsonDocument.Parse("{}").RootElement.Clone();
+    private static readonly JsonElement _emptyData = JsonElement.Parse("{}");
 
     private ClientWebSocket? _ws;
     private CancellationTokenSource? _loopCts;
@@ -130,14 +130,12 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
 
         AuthenticationTokenResponse tokenResp = await RequestAuthenticationTokenAsync(ct).ConfigureAwait(false);
         AuthenticationResponse final = await AuthenticateAsync(tokenResp.AuthenticationToken, ct).ConfigureAwait(false);
-        if (!final.Authenticated)
-        {
-            throw new VTubeStudioApiException(
+        return final.Authenticated
+            ? tokenResp.AuthenticationToken
+            : throw new VTubeStudioApiException(
                 VTubeStudioErrorId.AuthenticationTokenInvalid,
                 (int)VTubeStudioErrorId.AuthenticationTokenInvalid,
                 final.Reason ?? "Authentication failed after fresh token request.");
-        }
-        return tokenResp.AuthenticationToken;
     }
 
     /// <summary>Request a fresh authentication token. The user must approve the prompt in VTube Studio.</summary>
