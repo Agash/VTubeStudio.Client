@@ -11,9 +11,11 @@
     <MinVerTagPrefix>v</MinVerTagPrefix>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <!-- IDE0005 (remove unnecessary usings) only runs with GenerateDocumentationFile=true, which this
-         package does not enable; suppress so the build doesn't demand doc generation. -->
-    <NoWarn>$(NoWarn);IDE0005</NoWarn>
+    <!-- Generate XML docs so the published package ships IntelliSense. Set here (csproj .props phase)
+         rather than in Directory.Build.targets: the SDK reads GenerateDocumentationFile to compute
+         DocumentationFile and the csc /doc switch before Directory.Build.targets is imported, so
+         setting it there is too late and silently produces no docs / no CS1591 enforcement. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

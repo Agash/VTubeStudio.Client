@@ -45,6 +45,11 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
     private long _requestCounter;
     private bool _disposed;
 
+    /// <summary>Creates a client with the given options and optional logger.</summary>
+    /// <param name="options">Connection and plugin-identity options. <see cref="VTubeStudioClientOptions.PluginName"/> and <see cref="VTubeStudioClientOptions.PluginDeveloper"/> must be non-empty.</param>
+    /// <param name="logger">Optional logger; a no-op logger is used when null.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="options"/> is null.</exception>
+    /// <exception cref="ArgumentException"><see cref="VTubeStudioClientOptions.PluginName"/> or <see cref="VTubeStudioClientOptions.PluginDeveloper"/> is empty.</exception>
     public VTubeStudioClient(VTubeStudioClientOptions options, ILogger<VTubeStudioClient>? logger = null)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -178,74 +183,142 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
 
     // ── API surface (full coverage) ────────────────────────────────────────
 
+    /// <summary>Query whether the API is active and whether the current session is authenticated.</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The API state response.</returns>
     public Task<ApiStateResponse> GetApiStateAsync(CancellationToken ct = default) =>
         SendEmptyRequestAsync(VTubeStudioMessageTypes.ApiStateRequest, VTubeStudioJsonContext.Default.ApiStateResponse, ct);
 
+    /// <summary>Query VTube Studio runtime statistics (uptime, framerate, plugin counts, window metrics).</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The statistics response.</returns>
     public Task<StatisticsResponse> GetStatisticsAsync(CancellationToken ct = default) =>
         SendEmptyRequestAsync(VTubeStudioMessageTypes.StatisticsRequest, VTubeStudioJsonContext.Default.StatisticsResponse, ct);
 
+    /// <summary>Query whether a face is currently being tracked.</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The face-found response.</returns>
     public Task<FaceFoundResponse> GetFaceFoundAsync(CancellationToken ct = default) =>
         SendEmptyRequestAsync(VTubeStudioMessageTypes.FaceFoundRequest, VTubeStudioJsonContext.Default.FaceFoundResponse, ct);
 
+    /// <summary>Query information about the currently loaded model.</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The current-model response.</returns>
     public Task<CurrentModelResponse> GetCurrentModelAsync(CancellationToken ct = default) =>
         SendEmptyRequestAsync(VTubeStudioMessageTypes.CurrentModelRequest, VTubeStudioJsonContext.Default.CurrentModelResponse, ct);
 
+    /// <summary>List all models available on the machine.</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The available-models response.</returns>
     public Task<AvailableModelsResponse> GetAvailableModelsAsync(CancellationToken ct = default) =>
         SendEmptyRequestAsync(VTubeStudioMessageTypes.AvailableModelsRequest, VTubeStudioJsonContext.Default.AvailableModelsResponse, ct);
 
+    /// <summary>Load a model by id (an empty id unloads the current model).</summary>
+    /// <param name="request">The model-load request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The model-load response confirming which model was loaded.</returns>
     public Task<ModelLoadResponse> LoadModelAsync(ModelLoadRequest request, CancellationToken ct = default) =>
         SendAsync(VTubeStudioMessageTypes.ModelLoadRequest, request,
             VTubeStudioJsonContext.Default.ModelLoadRequest, VTubeStudioJsonContext.Default.ModelLoadResponse, _options.RequestTimeout, ct);
 
+    /// <summary>Move, rotate, and scale the currently loaded model.</summary>
+    /// <param name="request">The move-model request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
     public Task MoveModelAsync(MoveModelRequest request, CancellationToken ct = default) =>
         SendAndDiscardAsync(VTubeStudioMessageTypes.MoveModelRequest, request,
             VTubeStudioJsonContext.Default.MoveModelRequest, ct);
 
+    /// <summary>List the hotkeys available in the current (or a specified) model.</summary>
+    /// <param name="request">Optional request narrowing to a specific model or item; null queries the current model.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The hotkeys response.</returns>
     public Task<HotkeysInCurrentModelResponse> GetHotkeysAsync(HotkeysInCurrentModelRequest? request = null, CancellationToken ct = default) =>
         SendAsync(VTubeStudioMessageTypes.HotkeysInCurrentModelRequest, request ?? new HotkeysInCurrentModelRequest(),
             VTubeStudioJsonContext.Default.HotkeysInCurrentModelRequest, VTubeStudioJsonContext.Default.HotkeysInCurrentModelResponse, _options.RequestTimeout, ct);
 
+    /// <summary>Trigger (execute) a hotkey by id or name.</summary>
+    /// <param name="request">The hotkey-trigger request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The response confirming which hotkey was triggered.</returns>
     public Task<HotkeyTriggerResponse> TriggerHotkeyAsync(HotkeyTriggerRequest request, CancellationToken ct = default) =>
         SendAsync(VTubeStudioMessageTypes.HotkeyTriggerRequest, request,
             VTubeStudioJsonContext.Default.HotkeyTriggerRequest, VTubeStudioJsonContext.Default.HotkeyTriggerResponse, _options.RequestTimeout, ct);
 
+    /// <summary>Query the activation state of the model's expressions.</summary>
+    /// <param name="request">Optional request enabling details or narrowing to one expression; null queries all.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The expression-state response.</returns>
     public Task<ExpressionStateResponse> GetExpressionStateAsync(ExpressionStateRequest? request = null, CancellationToken ct = default) =>
         SendAsync(VTubeStudioMessageTypes.ExpressionStateRequest, request ?? new ExpressionStateRequest(),
             VTubeStudioJsonContext.Default.ExpressionStateRequest, VTubeStudioJsonContext.Default.ExpressionStateResponse, _options.RequestTimeout, ct);
 
+    /// <summary>Activate or deactivate an expression.</summary>
+    /// <param name="request">The expression-activation request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
     public Task SetExpressionAsync(ExpressionActivationRequest request, CancellationToken ct = default) =>
         SendAndDiscardAsync(VTubeStudioMessageTypes.ExpressionActivationRequest, request,
             VTubeStudioJsonContext.Default.ExpressionActivationRequest, ct);
 
+    /// <summary>List the ArtMesh names and tags in the current model.</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The ArtMesh-list response.</returns>
     public Task<ArtMeshListResponse> GetArtMeshListAsync(CancellationToken ct = default) =>
         SendEmptyRequestAsync(VTubeStudioMessageTypes.ArtMeshListRequest, VTubeStudioJsonContext.Default.ArtMeshListResponse, ct);
 
+    /// <summary>Apply a color tint to the ArtMeshes selected by the request's matcher.</summary>
+    /// <param name="request">The color-tint request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
     public Task TintArtMeshAsync(ColorTintRequest request, CancellationToken ct = default) =>
         SendAndDiscardAsync(VTubeStudioMessageTypes.ColorTintRequest, request,
             VTubeStudioJsonContext.Default.ColorTintRequest, ct);
 
+    /// <summary>List the available tracking input parameters (default and custom).</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The input-parameter-list response.</returns>
     public Task<InputParameterListResponse> GetInputParametersAsync(CancellationToken ct = default) =>
         SendEmptyRequestAsync(VTubeStudioMessageTypes.InputParameterListRequest, VTubeStudioJsonContext.Default.InputParameterListResponse, ct);
 
+    /// <summary>List the current model's Live2D parameters and their values.</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The Live2D-parameter-list response.</returns>
     public Task<Live2DParameterListResponse> GetLive2DParametersAsync(CancellationToken ct = default) =>
         SendEmptyRequestAsync(VTubeStudioMessageTypes.Live2DParameterListRequest, VTubeStudioJsonContext.Default.Live2DParameterListResponse, ct);
 
+    /// <summary>Query the current value and range of a single parameter.</summary>
+    /// <param name="request">The parameter-value request naming the parameter.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The parameter's value and range.</returns>
     public Task<ParameterInfo> GetParameterValueAsync(ParameterValueRequest request, CancellationToken ct = default) =>
         SendAsync(VTubeStudioMessageTypes.ParameterValueRequest, request,
             VTubeStudioJsonContext.Default.ParameterValueRequest, VTubeStudioJsonContext.Default.ParameterInfo, _options.RequestTimeout, ct);
 
+    /// <summary>Inject tracking data into one or more parameters.</summary>
+    /// <param name="request">The inject-parameter-data request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
     public Task InjectParameterDataAsync(InjectParameterDataRequest request, CancellationToken ct = default) =>
         SendAndDiscardAsync(VTubeStudioMessageTypes.InjectParameterDataRequest, request,
             VTubeStudioJsonContext.Default.InjectParameterDataRequest, ct);
 
+    /// <summary>List available item files and/or the items currently loaded in the scene.</summary>
+    /// <param name="request">Optional request selecting which lists to include; null uses defaults.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The item-list response.</returns>
     public Task<ItemListResponse> GetItemListAsync(ItemListRequest? request = null, CancellationToken ct = default) =>
         SendAsync(VTubeStudioMessageTypes.ItemListRequest, request ?? new ItemListRequest(),
             VTubeStudioJsonContext.Default.ItemListRequest, VTubeStudioJsonContext.Default.ItemListResponse, _options.RequestTimeout, ct);
 
+    /// <summary>Load an item into the scene.</summary>
+    /// <param name="request">The item-load request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The item-load response carrying the new item's instance id.</returns>
     public Task<ItemLoadResponse> LoadItemAsync(ItemLoadRequest request, CancellationToken ct = default) =>
         SendAsync(VTubeStudioMessageTypes.ItemLoadRequest, request,
             VTubeStudioJsonContext.Default.ItemLoadRequest, VTubeStudioJsonContext.Default.ItemLoadResponse, _options.RequestTimeout, ct);
 
+    /// <summary>Unload one or more items from the scene.</summary>
+    /// <param name="request">The item-unload request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The item-unload response listing the items that were unloaded.</returns>
     public Task<ItemUnloadResponse> UnloadItemAsync(ItemUnloadRequest request, CancellationToken ct = default) =>
         SendAsync(VTubeStudioMessageTypes.ItemUnloadRequest, request,
             VTubeStudioJsonContext.Default.ItemUnloadRequest, VTubeStudioJsonContext.Default.ItemUnloadResponse, _options.RequestTimeout, ct);
@@ -475,6 +548,7 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
         _receiveLoop = null;
     }
 
+    /// <summary>Disconnects the client (if connected) and releases the underlying transport. Idempotent.</summary>
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
