@@ -32,7 +32,7 @@ jobs:
         fetch-depth: 0   # MinVer needs full history
 
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         global-json-file: global.json
 
@@ -102,7 +102,7 @@ jobs:
         path: ${{ env.NuGetDirectory }}
 
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
 
     - name: NuGet login (OIDC trusted publisher)
       id: login
