@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
@@ -9,7 +9,6 @@
     <Description>Modern .NET 10 / C# 14 client library for the VTube Studio WebSocket API. AOT-friendly, System.Text.Json source-generated, fully typed.</Description>
     <PackageTags>vtubestudio;vtuber;live2d;client;websocket;stj</PackageTags>
     <MinVerTagPrefix>v</MinVerTagPrefix>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Generate XML docs so the published package ships IntelliSense. Set here (csproj .props phase)
          rather than in Directory.Build.targets: the SDK reads GenerateDocumentationFile to compute

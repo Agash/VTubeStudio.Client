@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
@@ -9,7 +9,6 @@
     <Description>DI extensions for VTubeStudio.Client. Registers the client and its options in Microsoft.Extensions.DependencyInjection.</Description>
     <PackageTags>vtubestudio;client;di;ioc</PackageTags>
     <MinVerTagPrefix>v</MinVerTagPrefix>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Generate XML docs so the published package ships IntelliSense. Set here (csproj .props phase)
          rather than in Directory.Build.targets: the SDK reads GenerateDocumentationFile to compute
