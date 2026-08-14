@@ -44,7 +44,7 @@ jobs:
 
     - name: Run unit tests
       # global.json opts dotnet test into Microsoft.Testing.Platform on .NET 10 SDK.
-      run: dotnet test tests/VTubeStudio.Client.Tests/VTubeStudio.Client.Tests.csproj --configuration Release --no-build -- --coverage --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
+      run: dotnet test tests/VTubeStudio.Client.Tests/VTubeStudio.Client.Tests.csproj --configuration Release --no-build -- --coverage --coverage-settings coverage.settings.xml --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
 
     - name: Summarize coverage
       # Renders the cobertura totals into the run summary. Uploading the raw XML alone means nobody
