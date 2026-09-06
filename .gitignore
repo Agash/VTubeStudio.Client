@@ -6,3 +6,5 @@ obj/
 nuget/
 *.nupkg
 *.snupkg
+TestResults/
+*.cobertura.xml
