@@ -36,7 +36,8 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
 {
     private readonly VTubeStudioClientOptions _options;
     private readonly ILogger<VTubeStudioClient> _logger;
-    private readonly ConcurrentDictionary<string, TaskCompletionSource<VTubeStudioEnvelope>> _pending = new(StringComparer.Ordinal);
+
+    internal readonly ConcurrentDictionary<string, TaskCompletionSource<VTubeStudioEnvelope>> _pending = new(StringComparer.Ordinal);
     private static readonly JsonElement _emptyData = JsonElement.Parse("{}");
 
     private ClientWebSocket? _ws;
@@ -494,12 +495,26 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
         }
     }
 
-    private void DispatchMessage(string json)
+    internal void DispatchMessage(string json)
     {
         try
         {
             VTubeStudioEnvelope? env = JsonSerializer.Deserialize(json, VTubeStudioJsonContext.Default.VTubeStudioEnvelope);
             if (env is null) return;
+
+            // Event frames carry a requestID, so only messageType separates
+            // events from responses. Events end in Event.
+            if (env.MessageType.EndsWith("Event", StringComparison.Ordinal))
+            {
+                Events.Dispatch(env.MessageType, env.Data);
+                EventReceived?.Invoke(this, new VTubeStudioEventArgs
+                {
+                    EventName = env.MessageType,
+                    RawData = env.Data,
+                    ReceivedAtUtc = DateTimeOffset.UtcNow,
+                });
+                return;
+            }
 
             if (!string.IsNullOrEmpty(env.RequestId)
                 && _pending.TryRemove(env.RequestId, out TaskCompletionSource<VTubeStudioEnvelope>? tcs))
@@ -508,22 +523,7 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
                 return;
             }
 
-            // If a request timed out and its response arrived late, the frame still carries a
-            // request id but the pending entry is gone. Don't surface a timed-out response as
-            // a spurious event. Genuine subscription events carry message types ending in "Event".
-            if (!string.IsNullOrEmpty(env.RequestId)
-                || !env.MessageType.EndsWith("Event", StringComparison.Ordinal))
-            {
-                return;
-            }
-
-            Events.Dispatch(env.MessageType, env.Data);
-            EventReceived?.Invoke(this, new VTubeStudioEventArgs
-            {
-                EventName = env.MessageType,
-                RawData = env.Data,
-                ReceivedAtUtc = DateTimeOffset.UtcNow,
-            });
+            // Late or unknown responses are dropped.
         }
         catch (JsonException ex)
         {

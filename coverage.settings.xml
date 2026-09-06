@@ -17,5 +17,10 @@
         <Attribute>^System\.CodeDom\.Compiler\.GeneratedCodeAttribute$</Attribute>
       </Exclude>
     </Attributes>
+    <Sources>
+      <Exclude>
+        <Source>.*LoggerMessage\.g\.cs$</Source>
+      </Exclude>
+    </Sources>
   </CodeCoverage>
 </Configuration>

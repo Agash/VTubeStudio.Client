@@ -25,7 +25,7 @@ public sealed record VTubeStudioEnvelope
     [JsonPropertyName("messageType")]
     public required string MessageType { get; init; }
 
-    /// <summary>Correlation id echoed back on the matching response; null on unsolicited event frames.</summary>
+    /// <summary>Correlation id. Present on responses and event frames.</summary>
     [JsonPropertyName("requestID")]
     public string? RequestId { get; init; }
 
