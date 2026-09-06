@@ -37,6 +37,12 @@ public static class VTubeStudioMessageTypes
     /// <summary><c>messageType</c> of the response reporting whether the session is now authenticated.</summary>
     public const string AuthenticationResponse = "AuthenticationResponse";
 
+    /// <summary><c>messageType</c> for a request asking for a permission or listing granted permissions.</summary>
+    public const string PermissionRequest = "PermissionRequest";
+
+    /// <summary><c>messageType</c> of the response carrying the grant result and the permission list.</summary>
+    public const string PermissionResponse = "PermissionResponse";
+
     // Models ----------------------------------------------------------------
 
     /// <summary><c>messageType</c> for a request asking for information about the currently loaded model.</summary>
@@ -103,6 +109,18 @@ public static class VTubeStudioMessageTypes
     /// <summary><c>messageType</c> of the response reporting how many ArtMeshes were tinted.</summary>
     public const string ColorTintResponse = "ColorTintResponse";
 
+    /// <summary><c>messageType</c> for a request asking for the ArtMeshes at a position.</summary>
+    public const string ArtMeshAtPositionRequest = "ArtMeshAtPositionRequest";
+
+    /// <summary><c>messageType</c> of the response listing the ArtMeshes at the checked position.</summary>
+    public const string ArtMeshAtPositionResponse = "ArtMeshAtPositionResponse";
+
+    /// <summary><c>messageType</c> for a request asking the user to select ArtMeshes.</summary>
+    public const string ArtMeshSelectionRequest = "ArtMeshSelectionRequest";
+
+    /// <summary><c>messageType</c> of the response carrying the user's ArtMesh selection.</summary>
+    public const string ArtMeshSelectionResponse = "ArtMeshSelectionResponse";
+
     // Parameters ------------------------------------------------------------
 
     /// <summary><c>messageType</c> for a request asking for the list of available tracking input parameters.</summary>
@@ -128,6 +146,54 @@ public static class VTubeStudioMessageTypes
 
     /// <summary><c>messageType</c> of the response acknowledging an inject-parameter-data request.</summary>
     public const string InjectParameterDataResponse = "InjectParameterDataResponse";
+
+    /// <summary><c>messageType</c> for a request creating a custom tracking parameter.</summary>
+    public const string ParameterCreationRequest = "ParameterCreationRequest";
+
+    /// <summary><c>messageType</c> of the response confirming the created parameter.</summary>
+    public const string ParameterCreationResponse = "ParameterCreationResponse";
+
+    /// <summary><c>messageType</c> for a request deleting a custom tracking parameter.</summary>
+    public const string ParameterDeletionRequest = "ParameterDeletionRequest";
+
+    /// <summary><c>messageType</c> of the response confirming the deleted parameter.</summary>
+    public const string ParameterDeletionResponse = "ParameterDeletionResponse";
+
+    /// <summary><c>messageType</c> for a request asking for the scene lighting overlay state.</summary>
+    public const string SceneColorOverlayInfoRequest = "SceneColorOverlayInfoRequest";
+
+    /// <summary><c>messageType</c> of the response carrying the scene lighting overlay state.</summary>
+    public const string SceneColorOverlayInfoResponse = "SceneColorOverlayInfoResponse";
+
+    /// <summary><c>messageType</c> for a request asking for the current model physics settings.</summary>
+    public const string GetCurrentModelPhysicsRequest = "GetCurrentModelPhysicsRequest";
+
+    /// <summary><c>messageType</c> of the response carrying the physics settings.</summary>
+    public const string GetCurrentModelPhysicsResponse = "GetCurrentModelPhysicsResponse";
+
+    /// <summary><c>messageType</c> for a request overriding the current model physics settings.</summary>
+    public const string SetCurrentModelPhysicsRequest = "SetCurrentModelPhysicsRequest";
+
+    /// <summary><c>messageType</c> of the response acknowledging a physics override.</summary>
+    public const string SetCurrentModelPhysicsResponse = "SetCurrentModelPhysicsResponse";
+
+    /// <summary><c>messageType</c> for a request reading or changing the NDI configuration.</summary>
+    public const string NdiConfigRequest = "NDIConfigRequest";
+
+    /// <summary><c>messageType</c> of the response carrying the NDI configuration.</summary>
+    public const string NdiConfigResponse = "NDIConfigResponse";
+
+    /// <summary><c>messageType</c> for a request listing post-processing effects and state.</summary>
+    public const string PostProcessingListRequest = "PostProcessingListRequest";
+
+    /// <summary><c>messageType</c> of the response carrying post-processing effects and state.</summary>
+    public const string PostProcessingListResponse = "PostProcessingListResponse";
+
+    /// <summary><c>messageType</c> for a request changing post-processing effects.</summary>
+    public const string PostProcessingUpdateRequest = "PostProcessingUpdateRequest";
+
+    /// <summary><c>messageType</c> of the response confirming the post-processing update.</summary>
+    public const string PostProcessingUpdateResponse = "PostProcessingUpdateResponse";
 
     // Items -----------------------------------------------------------------
 
@@ -160,6 +226,18 @@ public static class VTubeStudioMessageTypes
 
     /// <summary><c>messageType</c> of the response reporting per-item move results.</summary>
     public const string ItemMoveResponse = "ItemMoveResponse";
+
+    /// <summary><c>messageType</c> for a request sorting an item between model layers.</summary>
+    public const string ItemSortRequest = "ItemSortRequest";
+
+    /// <summary><c>messageType</c> of the response confirming the applied sorting.</summary>
+    public const string ItemSortResponse = "ItemSortResponse";
+
+    /// <summary><c>messageType</c> for a request pinning an item to the model.</summary>
+    public const string ItemPinRequest = "ItemPinRequest";
+
+    /// <summary><c>messageType</c> of the response confirming the pin state.</summary>
+    public const string ItemPinResponse = "ItemPinResponse";
 
     // Tracking --------------------------------------------------------------
 

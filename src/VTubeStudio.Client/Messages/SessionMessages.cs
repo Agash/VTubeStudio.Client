@@ -52,3 +52,25 @@ public sealed record FaceFoundResponse
     /// <summary>True when a face is currently detected by tracking.</summary>
     [JsonPropertyName("found")] public required bool Found { get; init; }
 }
+
+/// <summary>Payload of a <c>VTSFolderInfoResponse</c>: the VTube Studio folder names.</summary>
+public sealed record VtsFolderInfoResponse
+{
+    /// <summary>The models folder name.</summary>
+    [JsonPropertyName("models")] public string? Models { get; init; }
+
+    /// <summary>The backgrounds folder name.</summary>
+    [JsonPropertyName("backgrounds")] public string? Backgrounds { get; init; }
+
+    /// <summary>The items folder name.</summary>
+    [JsonPropertyName("items")] public string? Items { get; init; }
+
+    /// <summary>The config folder name.</summary>
+    [JsonPropertyName("config")] public string? Config { get; init; }
+
+    /// <summary>The logs folder name.</summary>
+    [JsonPropertyName("logs")] public string? Logs { get; init; }
+
+    /// <summary>The backup folder name.</summary>
+    [JsonPropertyName("backup")] public string? Backup { get; init; }
+}

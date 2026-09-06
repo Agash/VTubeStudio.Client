@@ -78,19 +78,20 @@ await vts.ConnectAsync();
 
 ## What's covered
 
-- Session / state: `APIStateRequest`, `StatisticsRequest`, `FaceFoundRequest`
-- Authentication: full token-request + session-authenticate two-step flow handled by one method
-- Models: current model, available models, load, move (with native server-side interpolation)
+- Session / state: `APIStateRequest`, `StatisticsRequest`, `FaceFoundRequest`, `VTSFolderInfoRequest`
+- Authentication: full token-request + session-authenticate two-step flow handled by one method, plus permission query/request
+- Models: current model, available models, load, move, physics get/set
 - Hotkeys: list, trigger by id (with item-instance scoping)
-- Expressions: state, activate / deactivate
-- Parameters: input + Live2D parameter lists, value query, custom-parameter injection
-- ArtMesh: list, color tint with the full `ArtMeshMatcher` semantics
-- Items: list, load, unload (single / by ids / by filename / all-by-plugin)
-- Events: subscribe / unsubscribe + typed config records, typed event hub via `IVTubeStudioEvent<TSelf>`
+- Expressions: state (with details), activate / deactivate
+- Parameters: input + Live2D parameter lists, value query, custom-parameter create/delete, custom-parameter injection
+- ArtMesh: list (with groups), color tint, at-position query, user selection
+- Scene: lighting overlay info, NDI config, post-processing list/update
+- Items: list, load (incl. custom image data), unload, animation control, move, sort, pin
+- Events: subscribe / unsubscribe (+all) with typed config records, typed event hub via `IVTubeStudioEvent<TSelf>`
 
 ## Sample
 
-[`samples/VTubeStudio.Client.Sample/`](samples/VTubeStudio.Client.Sample) is an interactive Spectre.Console app that exercises every public surface: connect, authenticate, model swap, hotkey trigger, expression cycle, item load with auto-unload, ArtMesh tint cycle, model orbit, custom parameter injection, live event tailing.
+[`samples/VTubeStudio.Client.Sample/`](samples/VTubeStudio.Client.Sample) is an interactive Spectre.Console app that exercises the public surface: connect, authenticate, model swap, hotkey trigger, expression cycle, item load with move/pin/unload, ArtMesh tint cycle and user selection, model orbit, custom parameter lifecycle (create, feed, delete), custom parameter injection, permissions, physics and post-processing reads, test-event ticks, live event tailing.
 
 ```bash
 cd samples/VTubeStudio.Client.Sample

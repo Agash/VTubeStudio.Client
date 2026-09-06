@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using VTubeStudio.Client.Messages;
 using VTubeStudio.Client.Serialization;
 
 namespace VTubeStudio.Client.Events;
@@ -235,8 +236,8 @@ public sealed record ModelClickedEventPayload : IVTubeStudioEvent<ModelClickedEv
     /// <summary>The number of ArtMeshes hit by the click.</summary>
     [JsonPropertyName("clickedArtMeshCount")] public int ClickedArtMeshCount { get; init; }
 
-    /// <summary>The ids of the ArtMeshes hit by the click.</summary>
-    [JsonPropertyName("artMeshHits")] public IReadOnlyList<string> ArtMeshHits { get; init; } = [];
+    /// <summary>Details for each ArtMesh hit by the click, topmost first.</summary>
+    [JsonPropertyName("artMeshHits")] public IReadOnlyList<ArtMeshHit> ArtMeshHits { get; init; } = [];
 }
 
 /// <summary>A 2D click position within the VTube Studio window.</summary>
@@ -273,4 +274,205 @@ public sealed record PostProcessingEventPayload : IVTubeStudioEvent<PostProcessi
 
     /// <summary>The name of the currently selected post-processing preset.</summary>
     [JsonPropertyName("currentPreset")] public string? CurrentPreset { get; init; }
+}
+
+/// <summary>Payload of a <c>TestEvent</c>: fired once per second while subscribed.</summary>
+public sealed record TestEventPayload : IVTubeStudioEvent<TestEventPayload>
+{
+    /// <inheritdoc/>
+    public static string EventName => VTubeStudioEventNames.Test;
+
+    /// <inheritdoc/>
+    public static JsonTypeInfo<TestEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.TestEventPayload;
+
+    /// <summary>The message from the subscription config.</summary>
+    [JsonPropertyName("yourTestMessage")] public string? YourTestMessage { get; init; }
+
+    /// <summary>Seconds since VTube Studio started.</summary>
+    [JsonPropertyName("counter")] public long Counter { get; init; }
+}
+
+/// <summary>Payload of a <c>ModelOutlineEvent</c>: the model outline polygon.</summary>
+public sealed record ModelOutlineEventPayload : IVTubeStudioEvent<ModelOutlineEventPayload>
+{
+    /// <inheritdoc/>
+    public static string EventName => VTubeStudioEventNames.ModelOutline;
+
+    /// <inheritdoc/>
+    public static JsonTypeInfo<ModelOutlineEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.ModelOutlineEventPayload;
+
+    /// <summary>The name of the model.</summary>
+    [JsonPropertyName("modelName")] public string? ModelName { get; init; }
+
+    /// <summary>The id of the model.</summary>
+    [JsonPropertyName("modelID")] public string? ModelId { get; init; }
+
+    /// <summary>Ordered outline points.</summary>
+    [JsonPropertyName("convexHull")] public IReadOnlyList<ClickPosition> ConvexHull { get; init; } = [];
+
+    /// <summary>Center of the outline points.</summary>
+    [JsonPropertyName("convexHullCenter")] public ClickPosition? ConvexHullCenter { get; init; }
+
+    /// <summary>The VTube Studio window size in pixels.</summary>
+    [JsonPropertyName("windowSize")] public WindowSize? WindowSize { get; init; }
+}
+
+/// <summary>Payload of a <c>Live2DCubismEditorConnectedEvent</c>: the Live2D Cubism editor connection state.</summary>
+public sealed record Live2DCubismEditorConnectedEventPayload : IVTubeStudioEvent<Live2DCubismEditorConnectedEventPayload>
+{
+    /// <inheritdoc/>
+    public static string EventName => VTubeStudioEventNames.Live2DCubismEditorConnected;
+
+    /// <inheritdoc/>
+    public static JsonTypeInfo<Live2DCubismEditorConnectedEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.Live2DCubismEditorConnectedEventPayload;
+
+    /// <summary>True when VTube Studio tries to connect to the editor.</summary>
+    [JsonPropertyName("tryingToConnect")] public bool TryingToConnect { get; init; }
+
+    /// <summary>True when fully connected and authenticated.</summary>
+    [JsonPropertyName("connected")] public bool Connected { get; init; }
+
+    /// <summary>True when parameter data is sent to the editor.</summary>
+    [JsonPropertyName("shouldSendParameters")] public bool ShouldSendParameters { get; init; }
+}
+
+/// <summary>Payload of an <c>ExpressionToggledEvent</c>: fired when an expression is toggled.</summary>
+public sealed record ExpressionToggledEventPayload : IVTubeStudioEvent<ExpressionToggledEventPayload>
+{
+    /// <inheritdoc/>
+    public static string EventName => VTubeStudioEventNames.ExpressionToggled;
+
+    /// <inheritdoc/>
+    public static JsonTypeInfo<ExpressionToggledEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.ExpressionToggledEventPayload;
+
+    /// <summary>The id of the model.</summary>
+    [JsonPropertyName("modelID")] public string? ModelId { get; init; }
+
+    /// <summary>The name of the model.</summary>
+    [JsonPropertyName("modelName")] public string? ModelName { get; init; }
+
+    /// <summary>True when the expression belongs to a Live2D item.</summary>
+    [JsonPropertyName("isLive2DItem")] public bool IsLive2DItem { get; init; }
+
+    /// <summary>The item instance id for Live2D items; empty for main models.</summary>
+    [JsonPropertyName("itemInstanceID")] public string? ItemInstanceId { get; init; }
+
+    /// <summary>True for initial-state snapshot events.</summary>
+    [JsonPropertyName("justLoaded")] public bool JustLoaded { get; init; }
+
+    /// <summary>The expression file.</summary>
+    [JsonPropertyName("expressionFile")] public string? ExpressionFile { get; init; }
+
+    /// <summary>The expression name without file extension.</summary>
+    [JsonPropertyName("expressionName")] public string? ExpressionName { get; init; }
+
+    /// <summary>True when the expression is now active.</summary>
+    [JsonPropertyName("active")] public bool Active { get; init; }
+}
+
+/// <summary>Payload of an <c>ArtMeshTrackingEvent</c>: tracked ArtMesh points.</summary>
+public sealed record ArtMeshTrackingEventPayload : IVTubeStudioEvent<ArtMeshTrackingEventPayload>
+{
+    /// <inheritdoc/>
+    public static string EventName => VTubeStudioEventNames.ArtMeshTracking;
+
+    /// <inheritdoc/>
+    public static JsonTypeInfo<ArtMeshTrackingEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.ArtMeshTrackingEventPayload;
+
+    /// <summary>True when a model is loaded.</summary>
+    [JsonPropertyName("modelLoaded")] public bool ModelLoaded { get; init; }
+
+    /// <summary>The id of the loaded model.</summary>
+    [JsonPropertyName("modelID")] public string? ModelId { get; init; }
+
+    /// <summary>The VTube Studio window size in pixels.</summary>
+    [JsonPropertyName("windowSize")] public WindowSize? WindowSize { get; init; }
+
+    /// <summary>Number of subscribed tracking points.</summary>
+    [JsonPropertyName("subscribedPointsCount")] public int SubscribedPointsCount { get; init; }
+
+    /// <summary>Number of found tracking points.</summary>
+    [JsonPropertyName("foundPointsCount")] public int FoundPointsCount { get; init; }
+
+    /// <summary>Counter increasing with every event.</summary>
+    [JsonPropertyName("eventCounter")] public long EventCounter { get; init; }
+
+    /// <summary>The found tracking points.</summary>
+    [JsonPropertyName("trackingPoints")] public IReadOnlyList<TrackedArtMeshPoint> TrackingPoints { get; init; } = [];
+}
+
+/// <summary>One found point in <see cref="ArtMeshTrackingEventPayload.TrackingPoints"/>.</summary>
+public sealed record TrackedArtMeshPoint
+{
+    /// <summary>The tracking point id from the subscription config.</summary>
+    [JsonPropertyName("trackingPointID")] public string? TrackingPointId { get; init; }
+
+    /// <summary>True when the ArtMesh is currently visible.</summary>
+    [JsonPropertyName("artMeshVisible")] public bool ArtMeshVisible { get; init; }
+
+    /// <summary>The tracked position.</summary>
+    [JsonPropertyName("position")] public ClickPosition? Position { get; init; }
+
+    /// <summary>Rotation in degrees (0-360).</summary>
+    [JsonPropertyName("rotation")] public double Rotation { get; init; }
+
+    /// <summary>Size in VTube Studio coordinate units.</summary>
+    [JsonPropertyName("size")] public double Size { get; init; }
+}
+
+/// <summary>Payload of an <c>ArtMeshOutlineEvent</c>: ArtMesh boundary outlines.</summary>
+public sealed record ArtMeshOutlineEventPayload : IVTubeStudioEvent<ArtMeshOutlineEventPayload>
+{
+    /// <inheritdoc/>
+    public static string EventName => VTubeStudioEventNames.ArtMeshOutline;
+
+    /// <inheritdoc/>
+    public static JsonTypeInfo<ArtMeshOutlineEventPayload> JsonTypeInfo => VTubeStudioJsonContext.Default.ArtMeshOutlineEventPayload;
+
+    /// <summary>True when a model is loaded.</summary>
+    [JsonPropertyName("modelLoaded")] public bool ModelLoaded { get; init; }
+
+    /// <summary>The id of the loaded model.</summary>
+    [JsonPropertyName("modelID")] public string? ModelId { get; init; }
+
+    /// <summary>The VTube Studio window size in pixels.</summary>
+    [JsonPropertyName("windowSize")] public WindowSize? WindowSize { get; init; }
+
+    /// <summary>Number of subscribed ArtMeshes.</summary>
+    [JsonPropertyName("subscribedArtMeshCount")] public int SubscribedArtMeshCount { get; init; }
+
+    /// <summary>Number of found ArtMeshes.</summary>
+    [JsonPropertyName("foundArtMeshCount")] public int FoundArtMeshCount { get; init; }
+
+    /// <summary>Counter increasing with every event.</summary>
+    [JsonPropertyName("eventCounter")] public long EventCounter { get; init; }
+
+    /// <summary>The found ArtMesh outlines.</summary>
+    [JsonPropertyName("artMeshOutlines")] public IReadOnlyList<ArtMeshOutline> ArtMeshOutlines { get; init; } = [];
+}
+
+/// <summary>One outline in <see cref="ArtMeshOutlineEventPayload.ArtMeshOutlines"/>.</summary>
+public sealed record ArtMeshOutline
+{
+    /// <summary>The ArtMesh id.</summary>
+    [JsonPropertyName("artMeshID")] public string? ArtMeshId { get; init; }
+
+    /// <summary>True when the ArtMesh is currently visible.</summary>
+    [JsonPropertyName("artMeshVisible")] public bool ArtMeshVisible { get; init; }
+
+    /// <summary>Number of boundary rings.</summary>
+    [JsonPropertyName("outlineCount")] public int OutlineCount { get; init; }
+
+    /// <summary>Combined area of the rings in coordinate units.</summary>
+    [JsonPropertyName("outlineArea")] public double OutlineArea { get; init; }
+
+    /// <summary>The boundary rings.</summary>
+    [JsonPropertyName("outlinePoints")] public IReadOnlyList<ArtMeshOutlineRing> OutlinePoints { get; init; } = [];
+}
+
+/// <summary>One boundary ring of an <see cref="ArtMeshOutline"/>.</summary>
+public sealed record ArtMeshOutlineRing
+{
+    /// <summary>Flat X/Y pairs describing 20 outline points (40 numbers).</summary>
+    [JsonPropertyName("points")] public IReadOnlyList<double> Points { get; init; } = [];
 }
