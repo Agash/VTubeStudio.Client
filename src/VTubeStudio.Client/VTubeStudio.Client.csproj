@@ -23,4 +23,8 @@
     <PackageReference Include="DotNet.ReproducibleBuilds" PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="VTubeStudio.Client.Tests" />
+  </ItemGroup>
+
 </Project>
