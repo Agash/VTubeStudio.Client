@@ -72,12 +72,99 @@ public sealed class ContractsTests
     [TestMethod]
     public void ApiException_PreservesIdsAndMessage()
     {
-        VTubeStudioApiException ex = new(VTubeStudioErrorId.AuthenticationTokenInvalid, 50, "Denied");
+        VTubeStudioApiException ex = new(VTubeStudioErrorId.TokenRequestDenied, 50, "Denied");
 
-        Assert.AreEqual(VTubeStudioErrorId.AuthenticationTokenInvalid, ex.ErrorId);
+        Assert.AreEqual(VTubeStudioErrorId.TokenRequestDenied, ex.ErrorId);
         Assert.AreEqual(50, ex.ErrorIdRaw);
         Assert.AreEqual("Denied", ex.ApiMessage);
         Assert.AreEqual("[50] Denied", ex.Message);
+    }
+
+    [TestMethod]
+    [DataRow(VTubeStudioErrorId.Unknown, -1)]
+    [DataRow(VTubeStudioErrorId.InternalServerError, 0)]
+    [DataRow(VTubeStudioErrorId.RequestTypeUnknown, 7)]
+    [DataRow(VTubeStudioErrorId.RequestRequiresAuthentication, 8)]
+    [DataRow(VTubeStudioErrorId.RequestRequiresPermission, 9)]
+    [DataRow(VTubeStudioErrorId.TokenRequestDenied, 50)]
+    [DataRow(VTubeStudioErrorId.TokenRequestPluginIconInvalid, 54)]
+    [DataRow(VTubeStudioErrorId.AuthenticationTokenMissing, 100)]
+    [DataRow(VTubeStudioErrorId.AuthenticationPluginDeveloperMissing, 102)]
+    [DataRow(VTubeStudioErrorId.ModelIdMissing, 150)]
+    [DataRow(VTubeStudioErrorId.CannotCurrentlyChangeModel, 154)]
+    [DataRow(VTubeStudioErrorId.HotkeyQueueFull, 200)]
+    [DataRow(VTubeStudioErrorId.HotkeyExecutionFailedBecauseLive2DItemsDoNotSupportThisHotkeyType, 208)]
+    [DataRow(VTubeStudioErrorId.ColorTintRequestNoModelLoaded, 250)]
+    [DataRow(VTubeStudioErrorId.ColorTintRequestInvalidColorValue, 252)]
+    [DataRow(VTubeStudioErrorId.MoveModelRequestNoModelLoaded, 300)]
+    [DataRow(VTubeStudioErrorId.MoveModelRequestValuesOutOfRange, 302)]
+    [DataRow(VTubeStudioErrorId.CustomParamNameInvalid, 350)]
+    [DataRow(VTubeStudioErrorId.CustomParamLimitTotalExceeded, 356)]
+    [DataRow(VTubeStudioErrorId.CustomParamDeletionNameInvalid, 400)]
+    [DataRow(VTubeStudioErrorId.CustomParamDeletionCannotDeleteDefaultParam, 403)]
+    [DataRow(VTubeStudioErrorId.InjectDataNoDataProvided, 450)]
+    [DataRow(VTubeStudioErrorId.InjectDataModeUnknown, 455)]
+    [DataRow(VTubeStudioErrorId.ParameterValueRequestParameterNotFound, 500)]
+    [DataRow(VTubeStudioErrorId.NdiConfigCooldownNotOver, 550)]
+    [DataRow(VTubeStudioErrorId.NdiConfigResolutionInvalid, 551)]
+    [DataRow(VTubeStudioErrorId.ExpressionStateRequestInvalidFilename, 600)]
+    [DataRow(VTubeStudioErrorId.ExpressionStateRequestFileNotFound, 601)]
+    [DataRow(VTubeStudioErrorId.ExpressionActivationRequestInvalidFilename, 650)]
+    [DataRow(VTubeStudioErrorId.ExpressionActivationRequestNoModelLoaded, 652)]
+    [DataRow(VTubeStudioErrorId.SetCurrentModelPhysicsRequestNoModelLoaded, 700)]
+    [DataRow(VTubeStudioErrorId.SetCurrentModelPhysicsRequestDuplicatePhysicsGroupId, 706)]
+    [DataRow(VTubeStudioErrorId.ItemFileNameMissing, 750)]
+    [DataRow(VTubeStudioErrorId.ItemLoadLoadCooldownNotOver, 752)]
+    [DataRow(VTubeStudioErrorId.ItemCustomDataLoadRequestRejectedByUser, 760)]
+    [DataRow(VTubeStudioErrorId.CannotCurrentlyUnloadItem, 800)]
+    [DataRow(VTubeStudioErrorId.ItemAnimationControlInstanceIdNotFound, 850)]
+    [DataRow(VTubeStudioErrorId.ItemAnimationControlSimpleImageDoesNotSupportAnim, 854)]
+    [DataRow(VTubeStudioErrorId.ItemMoveRequestInstanceIdNotFound, 900)]
+    [DataRow(VTubeStudioErrorId.ItemMoveRequestCannotCurrentlyChangeOrder, 903)]
+    [DataRow(VTubeStudioErrorId.EventSubscriptionRequestEventTypeUnknown, 950)]
+    [DataRow(VTubeStudioErrorId.ArtMeshSelectionRequestNoModelLoaded, 1000)]
+    [DataRow(VTubeStudioErrorId.ArtMeshSelectionRequestArtMeshIdListError, 1003)]
+    [DataRow(VTubeStudioErrorId.ItemPinRequestGivenItemNotLoaded, 1050)]
+    [DataRow(VTubeStudioErrorId.ItemPinRequestPinPositionInvalid, 1054)]
+    [DataRow(VTubeStudioErrorId.PermissionRequestUnknownPermission, 1100)]
+    [DataRow(VTubeStudioErrorId.PermissionRequestFileProblem, 1102)]
+    [DataRow(VTubeStudioErrorId.PostProcessingListRequestInvalidFilter, 1150)]
+    [DataRow(VTubeStudioErrorId.PostProcessingUpdateRequestCannotUpdateRightNow, 1200)]
+    [DataRow(VTubeStudioErrorId.PostProcessingUpdateRequestTriedToLoadRestrictedEffect, 1206)]
+    [DataRow(VTubeStudioErrorId.ItemSortRequestInstanceIdNotFound, 1250)]
+    [DataRow(VTubeStudioErrorId.ItemSortRequestItemConfigWindowOpen, 1255)]
+    [DataRow(VTubeStudioErrorId.EventTestEventTestMessageTooLong, 100000)]
+    [DataRow(VTubeStudioErrorId.EventModelLoadedEventModelIdInvalid, 100050)]
+    [DataRow(VTubeStudioErrorId.EventHotkeyTriggeredEventHotkeyActionInvalid, 100100)]
+    [DataRow(VTubeStudioErrorId.EventArtMeshTrackingEventTrackingPointsInvalid, 100150)]
+    [DataRow(VTubeStudioErrorId.EventArtMeshTrackingEventFrequencyInvalid, 100151)]
+    [DataRow(VTubeStudioErrorId.EventArtMeshOutlineEventArtMeshesInvalid, 100200)]
+    [DataRow(VTubeStudioErrorId.EventArtMeshOutlineEventFrequencyInvalid, 100201)]
+    public void ErrorId_MatchesUpstreamValue(VTubeStudioErrorId id, int raw)
+    {
+        Assert.AreEqual(raw, (int)id);
+        Assert.IsTrue(Enum.IsDefined(typeof(VTubeStudioErrorId), raw));
+    }
+
+    [TestMethod]
+    public void ErrorId_CoversFullUpstreamSet()
+    {
+        Assert.AreEqual(126, Enum.GetValues<VTubeStudioErrorId>().Length);
+    }
+
+    [TestMethod]
+    public void UnrecognizedError_PreservesRawId()
+    {
+        const int raw = 99999;
+        Assert.IsFalse(Enum.IsDefined(typeof(VTubeStudioErrorId), raw));
+
+        VTubeStudioErrorId mapped = Enum.IsDefined(typeof(VTubeStudioErrorId), raw)
+            ? (VTubeStudioErrorId)raw
+            : VTubeStudioErrorId.Unknown;
+        VTubeStudioApiException ex = new(mapped, raw, "Custom");
+
+        Assert.AreEqual(VTubeStudioErrorId.Unknown, ex.ErrorId);
+        Assert.AreEqual(raw, ex.ErrorIdRaw);
     }
 
     [TestMethod]
@@ -106,9 +193,25 @@ public sealed class ContractsTests
         });
         Assert.IsFalse(client.IsConnected);
 
+        await client.DisconnectAsync();
         await client.DisposeAsync();
         await client.DisposeAsync();
         await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => client.ConnectAsync());
+    }
+
+    [TestMethod]
+    public void ClientOptions_HaveDocumentedDefaults()
+    {
+        VTubeStudioClientOptions options = new()
+        {
+            PluginName = "Plugin",
+            PluginDeveloper = "Dev",
+        };
+
+        Assert.AreEqual(VTubeStudioApi.DefaultEndpoint, options.Endpoint);
+        Assert.AreEqual(TimeSpan.FromSeconds(10), options.RequestTimeout);
+        Assert.AreEqual(TimeSpan.FromMinutes(2), options.AuthApprovalTimeout);
+        Assert.AreEqual(16 * 1024, options.ReceiveBufferSize);
     }
 
     [TestMethod]

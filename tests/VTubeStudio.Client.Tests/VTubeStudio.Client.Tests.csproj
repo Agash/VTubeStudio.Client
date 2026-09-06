@@ -13,6 +13,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\VTubeStudio.Client\VTubeStudio.Client.csproj" />
+    <ProjectReference Include="..\..\src\VTubeStudio.Client.DependencyInjection\VTubeStudio.Client.DependencyInjection.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="MSTest.TestAdapter" />
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
