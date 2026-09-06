@@ -79,6 +79,46 @@ public sealed record InjectParameterDataRequest
     [JsonPropertyName("parameterValues")] public required IReadOnlyList<ParameterValue> ParameterValues { get; init; }
 }
 
+/// <summary>Payload of a <c>ParameterCreationRequest</c>: creates a custom tracking parameter.</summary>
+public sealed record ParameterCreationRequest
+{
+    /// <summary>Parameter name: unique, alphanumeric, 4-32 characters.</summary>
+    [JsonPropertyName("parameterName")] public required string ParameterName { get; init; }
+
+    /// <summary>Short explanation shown in the parameter details; under 256 characters.</summary>
+    [JsonPropertyName("explanation")] public string? Explanation { get; init; }
+
+    /// <summary>Default lower value for new mappings (-1000000 to 1000000).</summary>
+    [JsonPropertyName("min")] public double Min { get; init; }
+
+    /// <summary>Default upper value for new mappings (-1000000 to 1000000).</summary>
+    [JsonPropertyName("max")] public double Max { get; init; }
+
+    /// <summary>Default value (-1000000 to 1000000).</summary>
+    [JsonPropertyName("defaultValue")] public double DefaultValue { get; init; }
+}
+
+/// <summary>Payload of a <c>ParameterCreationResponse</c>: confirms the created parameter.</summary>
+public sealed record ParameterCreationResponse
+{
+    /// <summary>The name of the created parameter.</summary>
+    [JsonPropertyName("parameterName")] public required string ParameterName { get; init; }
+}
+
+/// <summary>Payload of a <c>ParameterDeletionRequest</c>: deletes a custom tracking parameter.</summary>
+public sealed record ParameterDeletionRequest
+{
+    /// <summary>The name of the parameter to delete.</summary>
+    [JsonPropertyName("parameterName")] public required string ParameterName { get; init; }
+}
+
+/// <summary>Payload of a <c>ParameterDeletionResponse</c>: confirms the deleted parameter.</summary>
+public sealed record ParameterDeletionResponse
+{
+    /// <summary>The name of the deleted parameter.</summary>
+    [JsonPropertyName("parameterName")] public required string ParameterName { get; init; }
+}
+
 /// <summary>A single parameter update injected via <see cref="InjectParameterDataRequest"/>.</summary>
 public sealed record ParameterValue
 {

@@ -139,8 +139,8 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
         return final.Authenticated
             ? tokenResp.AuthenticationToken
             : throw new VTubeStudioApiException(
-                VTubeStudioErrorId.AuthenticationTokenInvalid,
-                (int)VTubeStudioErrorId.AuthenticationTokenInvalid,
+                VTubeStudioErrorId.Unknown,
+                (int)VTubeStudioErrorId.Unknown,
                 final.Reason ?? "Authentication failed after fresh token request.");
     }
 
@@ -182,6 +182,19 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
             ct);
     }
 
+    /// <summary>Request a permission, or list granted permissions when <paramref name="requestedPermission"/> is null. Requesting shows a VTube Studio popup.</summary>
+    /// <param name="requestedPermission">The permission to request; null lists permissions without prompting.</param>
+    /// <param name="timeout">How long to wait for the user; defaults to two minutes.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The grant result and the permission list.</returns>
+    public Task<PermissionResponse> RequestPermissionAsync(string? requestedPermission = null, TimeSpan? timeout = null, CancellationToken ct = default)
+    {
+        PermissionRequest req = new() { RequestedPermission = requestedPermission };
+        return SendAsync(VTubeStudioMessageTypes.PermissionRequest, req,
+            VTubeStudioJsonContext.Default.PermissionRequest, VTubeStudioJsonContext.Default.PermissionResponse,
+            timeout ?? TimeSpan.FromMinutes(2), ct);
+    }
+
     // ── API surface (full coverage) ────────────────────────────────────────
 
     /// <summary>Query whether the API is active and whether the current session is authenticated.</summary>
@@ -201,6 +214,12 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
     /// <returns>The face-found response.</returns>
     public Task<FaceFoundResponse> GetFaceFoundAsync(CancellationToken ct = default) =>
         SendEmptyRequestAsync(VTubeStudioMessageTypes.FaceFoundRequest, VTubeStudioJsonContext.Default.FaceFoundResponse, ct);
+
+    /// <summary>Query the VTube Studio folder names.</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The folder-info response.</returns>
+    public Task<VtsFolderInfoResponse> GetVtsFolderInfoAsync(CancellationToken ct = default) =>
+        SendEmptyRequestAsync(VTubeStudioMessageTypes.VtsFolderInfoRequest, VTubeStudioJsonContext.Default.VtsFolderInfoResponse, ct);
 
     /// <summary>Query information about the currently loaded model.</summary>
     /// <param name="ct">Token to cancel the request.</param>
@@ -228,6 +247,56 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
     public Task MoveModelAsync(MoveModelRequest request, CancellationToken ct = default) =>
         SendAndDiscardAsync(VTubeStudioMessageTypes.MoveModelRequest, request,
             VTubeStudioJsonContext.Default.MoveModelRequest, ct);
+
+    /// <summary>Query the physics settings of the currently loaded model.</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The physics-settings response.</returns>
+    public Task<GetCurrentModelPhysicsResponse> GetCurrentModelPhysicsAsync(CancellationToken ct = default) =>
+        SendEmptyRequestAsync(VTubeStudioMessageTypes.GetCurrentModelPhysicsRequest, VTubeStudioJsonContext.Default.GetCurrentModelPhysicsResponse, ct);
+
+    /// <summary>Temporarily override the physics settings of the currently loaded model. Overrides expire on their timers.</summary>
+    /// <param name="request">The physics-override request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    public Task SetCurrentModelPhysicsAsync(SetCurrentModelPhysicsRequest request, CancellationToken ct = default) =>
+        SendAndDiscardAsync(VTubeStudioMessageTypes.SetCurrentModelPhysicsRequest, request,
+            VTubeStudioJsonContext.Default.SetCurrentModelPhysicsRequest, ct);
+
+    /// <summary>Query the scene lighting overlay state.</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The lighting-overlay response.</returns>
+    public Task<SceneColorOverlayInfoResponse> GetSceneColorOverlayInfoAsync(CancellationToken ct = default) =>
+        SendEmptyRequestAsync(VTubeStudioMessageTypes.SceneColorOverlayInfoRequest, VTubeStudioJsonContext.Default.SceneColorOverlayInfoResponse, ct);
+
+    /// <summary>Query the NDI configuration.</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The NDI configuration response.</returns>
+    public Task<NdiConfigResponse> GetNdiConfigAsync(CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.NdiConfigRequest, new NdiConfigRequest(),
+            VTubeStudioJsonContext.Default.NdiConfigRequest, VTubeStudioJsonContext.Default.NdiConfigResponse, _options.RequestTimeout, ct);
+
+    /// <summary>Change the NDI configuration. Requires permission and honors a server-side cooldown.</summary>
+    /// <param name="request">The NDI configuration to apply.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The NDI configuration response.</returns>
+    public Task<NdiConfigResponse> SetNdiConfigAsync(NdiConfigRequest request, CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.NdiConfigRequest, request,
+            VTubeStudioJsonContext.Default.NdiConfigRequest, VTubeStudioJsonContext.Default.NdiConfigResponse, _options.RequestTimeout, ct);
+
+    /// <summary>List post-processing effects and state.</summary>
+    /// <param name="request">Selects which arrays are filled and filters effects.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The post-processing list response.</returns>
+    public Task<PostProcessingListResponse> GetPostProcessingAsync(PostProcessingListRequest request, CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.PostProcessingListRequest, request,
+            VTubeStudioJsonContext.Default.PostProcessingListRequest, VTubeStudioJsonContext.Default.PostProcessingListResponse, _options.RequestTimeout, ct);
+
+    /// <summary>Change post-processing effects.</summary>
+    /// <param name="request">The post-processing update request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The post-processing state after the update.</returns>
+    public Task<PostProcessingUpdateResponse> UpdatePostProcessingAsync(PostProcessingUpdateRequest request, CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.PostProcessingUpdateRequest, request,
+            VTubeStudioJsonContext.Default.PostProcessingUpdateRequest, VTubeStudioJsonContext.Default.PostProcessingUpdateResponse, _options.RequestTimeout, ct);
 
     /// <summary>List the hotkeys available in the current (or a specified) model.</summary>
     /// <param name="request">Optional request narrowing to a specific model or item; null queries the current model.</param>
@@ -269,9 +338,28 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
     /// <summary>Apply a color tint to the ArtMeshes selected by the request's matcher.</summary>
     /// <param name="request">The color-tint request.</param>
     /// <param name="ct">Token to cancel the request.</param>
-    public Task TintArtMeshAsync(ColorTintRequest request, CancellationToken ct = default) =>
-        SendAndDiscardAsync(VTubeStudioMessageTypes.ColorTintRequest, request,
-            VTubeStudioJsonContext.Default.ColorTintRequest, ct);
+    /// <returns>The tint response reporting how many ArtMeshes were tinted.</returns>
+    public Task<ColorTintResponse> TintArtMeshAsync(ColorTintRequest request, CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.ColorTintRequest, request,
+            VTubeStudioJsonContext.Default.ColorTintRequest, VTubeStudioJsonContext.Default.ColorTintResponse, _options.RequestTimeout, ct);
+
+    /// <summary>List the ArtMeshes at a position in the current model.</summary>
+    /// <param name="request">The position request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The ArtMeshes at the checked position, topmost first.</returns>
+    public Task<ArtMeshAtPositionResponse> GetArtMeshesAtPositionAsync(ArtMeshAtPositionRequest request, CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.ArtMeshAtPositionRequest, request,
+            VTubeStudioJsonContext.Default.ArtMeshAtPositionRequest, VTubeStudioJsonContext.Default.ArtMeshAtPositionResponse, _options.RequestTimeout, ct);
+
+    /// <summary>Ask the user to select ArtMeshes. The response arrives once the user confirms or cancels.</summary>
+    /// <param name="request">The selection request.</param>
+    /// <param name="timeout">How long to wait for the user; defaults to five minutes.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The user's selection.</returns>
+    public Task<ArtMeshSelectionResponse> RequestArtMeshSelectionAsync(ArtMeshSelectionRequest request, TimeSpan? timeout = null, CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.ArtMeshSelectionRequest, request,
+            VTubeStudioJsonContext.Default.ArtMeshSelectionRequest, VTubeStudioJsonContext.Default.ArtMeshSelectionResponse,
+            timeout ?? TimeSpan.FromMinutes(5), ct);
 
     /// <summary>List the available tracking input parameters (default and custom).</summary>
     /// <param name="ct">Token to cancel the request.</param>
@@ -300,6 +388,22 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
         SendAndDiscardAsync(VTubeStudioMessageTypes.InjectParameterDataRequest, request,
             VTubeStudioJsonContext.Default.InjectParameterDataRequest, ct);
 
+    /// <summary>Create a custom tracking parameter.</summary>
+    /// <param name="request">The parameter-creation request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The creation response confirming the parameter name.</returns>
+    public Task<ParameterCreationResponse> CreateParameterAsync(ParameterCreationRequest request, CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.ParameterCreationRequest, request,
+            VTubeStudioJsonContext.Default.ParameterCreationRequest, VTubeStudioJsonContext.Default.ParameterCreationResponse, _options.RequestTimeout, ct);
+
+    /// <summary>Delete a custom tracking parameter.</summary>
+    /// <param name="request">The parameter-deletion request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The deletion response confirming the parameter name.</returns>
+    public Task<ParameterDeletionResponse> DeleteParameterAsync(ParameterDeletionRequest request, CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.ParameterDeletionRequest, request,
+            VTubeStudioJsonContext.Default.ParameterDeletionRequest, VTubeStudioJsonContext.Default.ParameterDeletionResponse, _options.RequestTimeout, ct);
+
     /// <summary>List available item files and/or the items currently loaded in the scene.</summary>
     /// <param name="request">Optional request selecting which lists to include; null uses defaults.</param>
     /// <param name="ct">Token to cancel the request.</param>
@@ -323,6 +427,38 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
     public Task<ItemUnloadResponse> UnloadItemAsync(ItemUnloadRequest request, CancellationToken ct = default) =>
         SendAsync(VTubeStudioMessageTypes.ItemUnloadRequest, request,
             VTubeStudioJsonContext.Default.ItemUnloadRequest, VTubeStudioJsonContext.Default.ItemUnloadResponse, _options.RequestTimeout, ct);
+
+    /// <summary>Control playback and appearance of an item.</summary>
+    /// <param name="request">The animation-control request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The item animation state.</returns>
+    public Task<ItemAnimationControlResponse> ControlItemAnimationAsync(ItemAnimationControlRequest request, CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.ItemAnimationControlRequest, request,
+            VTubeStudioJsonContext.Default.ItemAnimationControlRequest, VTubeStudioJsonContext.Default.ItemAnimationControlResponse, _options.RequestTimeout, ct);
+
+    /// <summary>Move one or more items in the scene.</summary>
+    /// <param name="request">The item-move request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The per-item move results.</returns>
+    public Task<ItemMoveResponse> MoveItemsAsync(ItemMoveRequest request, CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.ItemMoveRequest, request,
+            VTubeStudioJsonContext.Default.ItemMoveRequest, VTubeStudioJsonContext.Default.ItemMoveResponse, _options.RequestTimeout, ct);
+
+    /// <summary>Sort an item between the layers of the model.</summary>
+    /// <param name="request">The item-sort request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The applied sorting.</returns>
+    public Task<ItemSortResponse> SortItemAsync(ItemSortRequest request, CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.ItemSortRequest, request,
+            VTubeStudioJsonContext.Default.ItemSortRequest, VTubeStudioJsonContext.Default.ItemSortResponse, _options.RequestTimeout, ct);
+
+    /// <summary>Pin an item to the model, or unpin it.</summary>
+    /// <param name="request">The item-pin request.</param>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The pin state of the item.</returns>
+    public Task<ItemPinResponse> PinItemAsync(ItemPinRequest request, CancellationToken ct = default) =>
+        SendAsync(VTubeStudioMessageTypes.ItemPinRequest, request,
+            VTubeStudioJsonContext.Default.ItemPinRequest, VTubeStudioJsonContext.Default.ItemPinResponse, _options.RequestTimeout, ct);
 
     /// <summary>
     /// Subscribe (or unsubscribe) the current session to a typed event payload. The wire-format
@@ -363,6 +499,16 @@ public sealed partial class VTubeStudioClient : IAsyncDisposable
             Subscribe = subscribe,
             Config = configElement,
         };
+        return SendAsync(VTubeStudioMessageTypes.EventSubscriptionRequest, req,
+            VTubeStudioJsonContext.Default.EventSubscriptionRequest, VTubeStudioJsonContext.Default.EventSubscriptionResponse, _options.RequestTimeout, ct);
+    }
+
+    /// <summary>Unsubscribe the current session from all events.</summary>
+    /// <param name="ct">Token to cancel the request.</param>
+    /// <returns>The subscription response, with an empty event list.</returns>
+    public Task<EventSubscriptionResponse> UnsubscribeFromAllEventsAsync(CancellationToken ct = default)
+    {
+        EventSubscriptionRequest req = new() { Subscribe = false };
         return SendAsync(VTubeStudioMessageTypes.EventSubscriptionRequest, req,
             VTubeStudioJsonContext.Default.EventSubscriptionRequest, VTubeStudioJsonContext.Default.EventSubscriptionResponse, _options.RequestTimeout, ct);
     }

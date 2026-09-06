@@ -48,6 +48,35 @@ public sealed record ExpressionInfo
 
     /// <summary>Seconds remaining until the expression auto-deactivates (when auto-deactivate is enabled).</summary>
     [JsonPropertyName("secondsRemaining")] public double SecondsRemaining { get; init; }
+
+    /// <summary>Seconds since the expression was last active.</summary>
+    [JsonPropertyName("secondsSinceLastActive")] public double SecondsSinceLastActive { get; init; }
+
+    /// <summary>Hotkeys using the expression; empty unless requested with details.</summary>
+    [JsonPropertyName("usedInHotkeys")] public IReadOnlyList<ExpressionHotkey> UsedInHotkeys { get; init; } = [];
+
+    /// <summary>Live2D parameter targets of the expression; empty unless requested with details.</summary>
+    [JsonPropertyName("parameters")] public IReadOnlyList<ExpressionParameter> Parameters { get; init; } = [];
+}
+
+/// <summary>A hotkey using an expression.</summary>
+public sealed record ExpressionHotkey
+{
+    /// <summary>The hotkey name.</summary>
+    [JsonPropertyName("name")] public string? Name { get; init; }
+
+    /// <summary>The hotkey id.</summary>
+    [JsonPropertyName("id")] public string? Id { get; init; }
+}
+
+/// <summary>A Live2D parameter target of an expression.</summary>
+public sealed record ExpressionParameter
+{
+    /// <summary>The Live2D parameter id.</summary>
+    [JsonPropertyName("name")] public string? Name { get; init; }
+
+    /// <summary>The parameter target value.</summary>
+    [JsonPropertyName("value")] public double Value { get; init; }
 }
 
 /// <summary>Payload of an <c>ExpressionActivationRequest</c>: activates or deactivates an expression.</summary>

@@ -94,6 +94,16 @@ _ = await client.SubscribeAsync<TrackingStatusChangedEventPayload>();
 _ = await client.SubscribeAsync<ItemEventPayload>();
 _ = await client.SubscribeAsync<BackgroundChangedEventPayload>();
 
+// Batch mode for non-interactive verification: `dotnet run -- --auto` runs
+// every demo and reports the outcome per demo.
+if (args.Any(static a => a == "--auto"))
+{
+    int autoCode = await RunAutoAsync(client);
+    foreach (IDisposable sub in eventSubs) sub.Dispose();
+    AnsiConsole.MarkupLine("[grey]disconnecting...[/]");
+    return autoCode;
+}
+
 // ── Interactive menu ──────────────────────────────────────────────────────────
 using CancellationTokenSource shutdown = new();
 Console.CancelKeyPress += (_, e) => { e.Cancel = true; shutdown.Cancel(); };
@@ -108,10 +118,16 @@ try
                     "🎭  swap to a different model",
                     "🎬  trigger a random hotkey",
                     "😊  cycle through expressions",
-                    "🎩  drop an item (auto-unloads after 5s)",
+                    "🎩  drop an item (move, pin, unload)",
                     "🌈  color-tint the model (cycle hues on a region)",
                     "🌀  orbit the model around the canvas",
                     "📈  inject a sine-wave into a tracking parameter",
+                    "🧪  custom parameter lifecycle (create, feed, delete)",
+                    "🔐  permissions (list, optionally request)",
+                    "📦  read physics settings",
+                    "🌃  read post-processing state",
+                    "🎯  select ArtMeshes (VTS UI)",
+                    "⏱  watch test-event ticks for 10s",
                     "📡  watch live events for 30s",
                     "🔁  refresh overview",
                     "🚪  quit"));
@@ -127,6 +143,12 @@ try
                 case var s when s.StartsWith("🌈", StringComparison.Ordinal): await ColorCycleAsync(client, shutdown.Token); break;
                 case var s when s.StartsWith("🌀", StringComparison.Ordinal): await OrbitModelAsync(client, shutdown.Token); break;
                 case var s when s.StartsWith("📈", StringComparison.Ordinal): await InjectSineAsync(client, shutdown.Token); break;
+                case var s when s.StartsWith("🧪", StringComparison.Ordinal): await CustomParamLifecycleAsync(client, shutdown.Token); break;
+                case var s when s.StartsWith("🔐", StringComparison.Ordinal): await PermissionsAsync(client, shutdown.Token); break;
+                case var s when s.StartsWith("📦", StringComparison.Ordinal): await PhysicsAsync(client, shutdown.Token); break;
+                case var s when s.StartsWith("🌃", StringComparison.Ordinal): await PostProcessingAsync(client, shutdown.Token); break;
+                case var s when s.StartsWith("🎯", StringComparison.Ordinal): await SelectArtMeshesAsync(client, shutdown.Token); break;
+                case var s when s.StartsWith('⏱'): await TestTicksAsync(client, shutdown.Token); break;
                 case var s when s.StartsWith("📡", StringComparison.Ordinal): await WatchEventsAsync(shutdown.Token); break;
                 case var s when s.StartsWith("🔁", StringComparison.Ordinal): await RenderOverviewAsync(client); break;
                 case var s when s.StartsWith("🚪", StringComparison.Ordinal): shutdown.Cancel(); break;
@@ -134,11 +156,11 @@ try
         }
         catch (VTubeStudioApiException ex)
         {
-            AnsiConsole.MarkupLine($"[red]✗ VTS error:[/] {ex.Message} [grey](errorId {ex.ErrorIdRaw})[/]");
+            AnsiConsole.MarkupLine($"[red]✗ VTS error:[/] {Markup.Escape(ex.Message)} [grey](errorId {ex.ErrorIdRaw})[/]");
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            AnsiConsole.MarkupLine($"[red]✗ unexpected:[/] {ex.GetType().Name}: {ex.Message}");
+            AnsiConsole.MarkupLine($"[red]✗ unexpected:[/] {Markup.Escape(ex.GetType().Name)}: {Markup.Escape(ex.Message)}");
         }
     }
 }
@@ -196,7 +218,23 @@ static async Task SwapModelAsync(VTubeStudioClient client, CancellationToken ct)
     // the protocol error verbatim if you exceed it (VTubeStudioApiException with
     // ErrorId == ModelLoadCooldownNotOver).
     _ = await client.LoadModelAsync(new ModelLoadRequest { ModelId = pick.ModelId }, ct);
-    AnsiConsole.MarkupLine($"[green]✓[/] requested swap to [cyan]{pick.ModelName}[/]");
+    CurrentModelResponse loaded = await WaitForModelAsync(client, pick.ModelId, ct);
+    AnsiConsole.MarkupLine($"[green]✓[/] swapped to [cyan]{loaded.ModelName}[/]");
+}
+
+static async Task<CurrentModelResponse> WaitForModelAsync(VTubeStudioClient client, string modelId, CancellationToken ct)
+{
+    using CancellationTokenSource wait = CancellationTokenSource.CreateLinkedTokenSource(ct);
+    wait.CancelAfter(TimeSpan.FromSeconds(20));
+    while (true)
+    {
+        CurrentModelResponse current = await client.GetCurrentModelAsync(wait.Token);
+        if (current.ModelLoaded && current.ModelId == modelId)
+        {
+            return current;
+        }
+        await Task.Delay(TimeSpan.FromMilliseconds(300), wait.Token);
+    }
 }
 
 static async Task TriggerRandomHotkeyAsync(VTubeStudioClient client, CancellationToken ct)
@@ -258,11 +296,40 @@ static async Task DropItemAsync(VTubeStudioClient client, CancellationToken ct)
         FadeTime = 0.5,
         UnloadWhenPluginDisconnects = true,
     }, ct);
-    AnsiConsole.MarkupLine($"[green]✓[/] loaded as instance [grey]{loaded.InstanceId}[/], unloading in 5s...");
-    await Task.Delay(TimeSpan.FromSeconds(5), ct);
+    AnsiConsole.MarkupLine($"[green]✓[/] loaded as instance [grey]{loaded.InstanceId}[/]");
+    try
+    {
+        ItemMoveResponse moved = await client.MoveItemsAsync(new ItemMoveRequest
+        {
+            ItemsToMove = [new ItemMoveInstruction { ItemInstanceId = loaded.InstanceId, TimeInSeconds = 0.5, PositionX = 0.3, PositionY = 0 }],
+        }, ct);
+        bool movedOk = moved.MovedItems.Count == 1 && moved.MovedItems[0].Success;
+        AnsiConsole.MarkupLine($"[green]✓[/] moved [grey](success={movedOk})[/]");
 
-    _ = await client.UnloadItemAsync(new ItemUnloadRequest { InstanceIds = [loaded.InstanceId] }, ct);
-    AnsiConsole.MarkupLine("[green]✓[/] unloaded");
+        ItemPinResponse pin = await client.PinItemAsync(new ItemPinRequest
+        {
+            Pin = true,
+            ItemInstanceId = loaded.InstanceId,
+            AngleRelativeTo = "RelativeToModel",
+            SizeRelativeTo = "RelativeToWorld",
+            VertexPinType = "Center",
+            PinInfo = new ItemPinInfo(),
+        }, ct);
+        AnsiConsole.MarkupLine($"[green]✓[/] pinned [grey]({pin.IsPinned})[/], unpinning in 3s...");
+        await Task.Delay(TimeSpan.FromSeconds(3), ct);
+
+        ItemPinResponse unpin = await client.PinItemAsync(new ItemPinRequest
+        {
+            Pin = false,
+            ItemInstanceId = loaded.InstanceId,
+        }, ct);
+        AnsiConsole.MarkupLine($"[green]✓[/] unpinned [grey]({!unpin.IsPinned})[/]");
+    }
+    finally
+    {
+        _ = await client.UnloadItemAsync(new ItemUnloadRequest { InstanceIds = [loaded.InstanceId] }, ct);
+        AnsiConsole.MarkupLine("[green]✓[/] unloaded");
+    }
 }
 
 static async Task ColorCycleAsync(VTubeStudioClient client, CancellationToken ct)
@@ -369,6 +436,209 @@ static async Task InjectSineAsync(VTubeStudioClient client, CancellationToken ct
         await Task.Delay(TimeSpan.FromMilliseconds(33), ct);
     }
     AnsiConsole.MarkupLine("[green]✓[/] sine complete");
+}
+
+static async Task CustomParamLifecycleAsync(VTubeStudioClient client, CancellationToken ct)
+{
+    const string name = "VtsSampleParam";
+    AnsiConsole.MarkupLine($"[grey]creating custom parameter[/] [cyan]{name}[/]...");
+    ParameterCreationResponse created = await client.CreateParameterAsync(new ParameterCreationRequest
+    {
+        ParameterName = name,
+        Explanation = "Sample custom parameter.",
+        Min = -50,
+        Max = 50,
+        DefaultValue = 0,
+    }, ct);
+    AnsiConsole.MarkupLine($"[green]✓[/] created [grey]{created.ParameterName}[/]");
+    try
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            await client.InjectParameterDataAsync(new InjectParameterDataRequest
+            {
+                Mode = "set",
+                ParameterValues = [new ParameterValue { Id = name, Value = i * 10 }],
+            }, ct);
+            await Task.Delay(TimeSpan.FromMilliseconds(200), ct);
+        }
+        AnsiConsole.MarkupLine("[green]✓[/] fed values");
+    }
+    finally
+    {
+        ParameterDeletionResponse deleted = await client.DeleteParameterAsync(new ParameterDeletionRequest { ParameterName = name }, ct);
+        AnsiConsole.MarkupLine($"[green]✓[/] deleted [grey]{deleted.ParameterName}[/]");
+    }
+}
+
+static async Task PermissionsAsync(VTubeStudioClient client, CancellationToken ct)
+{
+    PermissionResponse permissions = await client.RequestPermissionAsync(ct: ct);
+    foreach (PermissionInfo info in permissions.Permissions)
+    {
+        AnsiConsole.MarkupLine($"[grey]permission[/] [cyan]{info.Name}[/] granted={info.Granted}");
+    }
+
+    if (AnsiConsole.Confirm("Request [cyan]LoadCustomImagesAsItems[/]? (shows a VTS popup)"))
+    {
+        try
+        {
+            PermissionResponse result = await client.RequestPermissionAsync("LoadCustomImagesAsItems", ct: ct);
+            AnsiConsole.MarkupLine($"[green]✓[/] grantSuccess={result.GrantSuccess}");
+        }
+        catch (VTubeStudioApiException ex)
+        {
+            AnsiConsole.MarkupLine($"[yellow]denied or unavailable:[/] {ex.Message}");
+        }
+    }
+}
+
+static async Task PhysicsAsync(VTubeStudioClient client, CancellationToken ct)
+{
+    GetCurrentModelPhysicsResponse physics = await client.GetCurrentModelPhysicsAsync(ct);
+    AnsiConsole.MarkupLine($"[grey]model[/] [cyan]{physics.ModelName}[/] hasPhysics={physics.ModelHasPhysics}");
+    foreach (PhysicsGroup group in physics.PhysicsGroups)
+    {
+        AnsiConsole.MarkupLine($"[grey]group[/] [cyan]{group.GroupName}[/] strength×{group.StrengthMultiplier} wind×{group.WindMultiplier}");
+    }
+}
+
+static async Task PostProcessingAsync(VTubeStudioClient client, CancellationToken ct)
+{
+    PostProcessingListResponse post = await client.GetPostProcessingAsync(new PostProcessingListRequest(), ct);
+    AnsiConsole.MarkupLine($"[grey]post-processing[/] supported={post.PostProcessingSupported} active={post.PostProcessingActive} effects={post.EffectCountBeforeFilter}");
+}
+
+static async Task SelectArtMeshesAsync(VTubeStudioClient client, CancellationToken ct)
+{
+    AnsiConsole.MarkupLine("[grey]pick ArtMeshes in the VTube Studio window...[/]");
+    ArtMeshSelectionResponse selection = await client.RequestArtMeshSelectionAsync(new ArtMeshSelectionRequest(), ct: ct);
+    AnsiConsole.MarkupLine($"[green]✓[/] success={selection.Success} active={selection.ActiveArtMeshes.Count}");
+}
+
+static async Task TestTicksAsync(VTubeStudioClient client, CancellationToken ct)
+{
+    using IDisposable tickSub = client.Events.On<TestEventPayload>(e => Log($"[grey]tick[/] {e.Counter}"));
+    _ = await client.SubscribeAsync<TestEventPayload>(ct: ct);
+    try
+    {
+        AnsiConsole.MarkupLine("[grey]watching test ticks for 10s...[/]");
+        await Task.Delay(TimeSpan.FromSeconds(10), ct);
+    }
+    finally
+    {
+        _ = await client.SubscribeAsync<TestEventPayload>(subscribe: false, ct: ct);
+    }
+
+    AnsiConsole.MarkupLine("[green]✓[/] watch ended");
+}
+
+static async Task<int> RunAutoAsync(VTubeStudioClient client)
+{
+    List<(string Name, string Outcome)> report = [];
+    using CancellationTokenSource auto = new(TimeSpan.FromMinutes(12));
+    CancellationToken ct = auto.Token;
+
+    CurrentModelResponse initial = await client.GetCurrentModelAsync(ct);
+    bool modelReady = initial.ModelLoaded || await TryEnsureModelAsync(client, ct);
+
+    async Task RunAsync(string name, Func<Task> demo, bool requiresModel = false)
+    {
+        if (requiresModel && !modelReady)
+        {
+            report.Add((name, "skipped (no model loaded)"));
+            AnsiConsole.MarkupLine($"[yellow]○[/] {name} [grey](skipped, no model loaded)[/]");
+            return;
+        }
+        try
+        {
+            await demo();
+            report.Add((name, "ok"));
+            AnsiConsole.MarkupLine($"[green]✓[/] {name}");
+        }
+        catch (VTubeStudioApiException ex)
+        {
+            report.Add((name, $"FAILED: {ex.Message} (errorId {ex.ErrorIdRaw})"));
+            AnsiConsole.MarkupLine($"[red]✗[/] {Markup.Escape(name)}: {Markup.Escape(ex.Message)} [grey](errorId {ex.ErrorIdRaw})[/]");
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            report.Add((name, $"FAILED: {ex.GetType().Name}: {ex.Message}"));
+            AnsiConsole.MarkupLine($"[red]✗[/] {Markup.Escape(name)}: {Markup.Escape(ex.GetType().Name)}: {Markup.Escape(ex.Message)}");
+        }
+    }
+
+    await RunAsync("overview", () => RenderOverviewAsync(client));
+    await RunAsync("swap model", () => SwapModelAsync(client, ct));
+    await RunAsync("trigger hotkey", () => TriggerRandomHotkeyAsync(client, ct), requiresModel: true);
+    await RunAsync("expressions", () => CycleExpressionsAsync(client, ct));
+    await RunAsync("drop item", () => DropItemAsync(client, ct));
+    await RunAsync("color tint", () => ColorCycleAsync(client, ct), requiresModel: true);
+    await RunAsync("orbit model", () => OrbitModelAsync(client, ct), requiresModel: true);
+    await RunAsync("inject sine", () => InjectSineAsync(client, ct));
+    await RunAsync("custom parameter lifecycle", () => CustomParamLifecycleAsync(client, ct));
+    await RunAsync("permissions", () => PermissionsAutoAsync(client, ct));
+    await RunAsync("physics", () => PhysicsAsync(client, ct));
+    await RunAsync("post-processing", () => PostProcessingAsync(client, ct));
+    await RunAsync("select artmeshes", () => SelectArtMeshesAsync(client, ct), requiresModel: true);
+    await RunAsync("test ticks", () => TestTicksAsync(client, ct));
+    await RunAsync("watch events", () => WatchEventsAsync(ct));
+
+    string restoreId = initial is { ModelLoaded: true, ModelId: not null } ? initial.ModelId : string.Empty;
+    bool restored = false;
+    for (int i = 0; i < 6 && !restored; i++)
+    {
+        try
+        {
+            _ = await client.LoadModelAsync(new ModelLoadRequest { ModelId = restoreId }, ct);
+            restored = true;
+        }
+        catch (VTubeStudioApiException ex)
+            when ((ex.ErrorId == VTubeStudioErrorId.ModelLoadCooldownNotOver || ex.ErrorId == VTubeStudioErrorId.CannotCurrentlyChangeModel) && i < 5)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(3), ct);
+        }
+    }
+    report.Add(("restore initial model", restored ? "ok" : "FAILED: model busy"));
+    AnsiConsole.MarkupLine(restored ? "[grey]restored initial model[/]" : "[red]✗ restore initial model: model busy[/]");
+
+    Table table = new();
+    _ = table.AddColumn("demo");
+    _ = table.AddColumn("result");
+    foreach ((string name, string outcome) in report)
+    {
+        _ = table.AddRow(Markup.Escape(name), Markup.Escape(outcome));
+    }
+    AnsiConsole.Write(table);
+
+    int failures = report.Count(r => r.Outcome.StartsWith("FAILED", StringComparison.Ordinal));
+    AnsiConsole.MarkupLine(failures == 0 ? "[green]auto run passed[/]" : $"[red]auto run failed ({failures})[/]");
+    return failures == 0 ? 0 : 1;
+}
+
+static async Task<bool> TryEnsureModelAsync(VTubeStudioClient client, CancellationToken ct)
+{
+    AvailableModelsResponse available = await client.GetAvailableModelsAsync(ct);
+    if (available.AvailableModels.Count == 0)
+    {
+        return false;
+    }
+    _ = await client.LoadModelAsync(new ModelLoadRequest { ModelId = available.AvailableModels[0].ModelId }, ct);
+    await Task.Delay(TimeSpan.FromSeconds(3), ct);
+    return true;
+}
+
+static async Task PermissionsAutoAsync(VTubeStudioClient client, CancellationToken ct)
+{
+    PermissionResponse permissions = await client.RequestPermissionAsync(ct: ct);
+    foreach (PermissionInfo info in permissions.Permissions)
+    {
+        AnsiConsole.MarkupLine($"[grey]permission[/] [cyan]{info.Name}[/] granted={info.Granted}");
+    }
+
+    AnsiConsole.MarkupLine("[yellow]Requesting LoadCustomImagesAsItems - approve the popup in VTube Studio.[/]");
+    PermissionResponse result = await client.RequestPermissionAsync("LoadCustomImagesAsItems", ct: ct);
+    AnsiConsole.MarkupLine($"[green]✓[/] grantSuccess={result.GrantSuccess}");
 }
 
 static async Task WatchEventsAsync(CancellationToken ct)

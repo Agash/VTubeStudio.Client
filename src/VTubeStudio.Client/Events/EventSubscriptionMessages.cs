@@ -6,8 +6,8 @@ namespace VTubeStudio.Client.Events;
 /// <summary>Payload of an <c>EventSubscriptionRequest</c>: subscribes to or unsubscribes from a named event.</summary>
 public sealed record EventSubscriptionRequest
 {
-    /// <summary>The event to (un)subscribe; one of the values in <see cref="VTubeStudioEventNames"/>.</summary>
-    [JsonPropertyName("eventName")] public required string EventName { get; init; }
+    /// <summary>The event to (un)subscribe; one of the values in <see cref="VTubeStudioEventNames"/>. Null unsubscribes from all events.</summary>
+    [JsonPropertyName("eventName")] public string? EventName { get; init; }
 
     /// <summary>True to subscribe, false to unsubscribe.</summary>
     [JsonPropertyName("subscribe")] public required bool Subscribe { get; init; }
@@ -67,4 +67,13 @@ public static class VTubeStudioEventNames
 
     /// <summary>Raised when the Live2D Cubism editor connects to VTube Studio.</summary>
     public const string Live2DCubismEditorConnected = "Live2DCubismEditorConnectedEvent";
+
+    /// <summary>Raised when an expression is toggled. Beta branch only.</summary>
+    public const string ExpressionToggled = "ExpressionToggledEvent";
+
+    /// <summary>Raised with tracked ArtMesh points at a fixed frequency. Beta branch only.</summary>
+    public const string ArtMeshTracking = "ArtMeshTrackingEvent";
+
+    /// <summary>Raised with ArtMesh outlines at a fixed frequency. Beta branch only.</summary>
+    public const string ArtMeshOutline = "ArtMeshOutlineEvent";
 }

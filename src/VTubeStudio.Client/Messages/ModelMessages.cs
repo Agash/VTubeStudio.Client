@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
+using VTubeStudio.Client.Events;
 
 namespace VTubeStudio.Client.Messages;
-
 /// <summary>Payload of a <c>CurrentModelResponse</c>: details about the currently loaded model.</summary>
 public sealed record CurrentModelResponse
 {
@@ -43,6 +43,9 @@ public sealed record CurrentModelResponse
 
     /// <summary>Texture resolution in pixels.</summary>
     [JsonPropertyName("textureResolution")] public int TextureResolution { get; init; }
+
+    /// <summary>The current model position, rotation and size.</summary>
+    [JsonPropertyName("modelPosition")] public ModelPosition? ModelPosition { get; init; }
 }
 
 /// <summary>Payload of an <c>AvailableModelsResponse</c>: every model available on the machine.</summary>
