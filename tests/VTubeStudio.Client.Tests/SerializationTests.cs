@@ -19,8 +19,14 @@ public sealed class SerializationTests
             Data = JsonElement.Parse("""{"hotkeyID":"X"}"""),
         };
 
-        string json = JsonSerializer.Serialize(envelope, VTubeStudioJsonContext.Default.VTubeStudioEnvelope);
-        VTubeStudioEnvelope? back = JsonSerializer.Deserialize(json, VTubeStudioJsonContext.Default.VTubeStudioEnvelope);
+        string json = JsonSerializer.Serialize(
+            envelope,
+            VTubeStudioJsonContext.Default.VTubeStudioEnvelope
+        );
+        VTubeStudioEnvelope? back = JsonSerializer.Deserialize(
+            json,
+            VTubeStudioJsonContext.Default.VTubeStudioEnvelope
+        );
 
         Assert.IsNotNull(back);
         Assert.AreEqual(VTubeStudioApi.ApiName, back!.ApiName);
@@ -45,7 +51,10 @@ public sealed class SerializationTests
               "isLive2DItem": false
             }
             """;
-        HotkeyTriggeredEventPayload? p = JsonSerializer.Deserialize(json, VTubeStudioJsonContext.Default.HotkeyTriggeredEventPayload);
+        HotkeyTriggeredEventPayload? p = JsonSerializer.Deserialize(
+            json,
+            VTubeStudioJsonContext.Default.HotkeyTriggeredEventPayload
+        );
         Assert.IsNotNull(p);
         Assert.AreEqual("hk-1", p!.HotkeyId);
         Assert.IsTrue(p.HotkeyTriggeredByApi);
@@ -56,7 +65,10 @@ public sealed class SerializationTests
     public void TrackingStatusChangedEventPayload_DeserializesAllFields()
     {
         const string json = """{"faceFound":true,"leftHandFound":false,"rightHandFound":true}""";
-        TrackingStatusChangedEventPayload? p = JsonSerializer.Deserialize(json, VTubeStudioJsonContext.Default.TrackingStatusChangedEventPayload);
+        TrackingStatusChangedEventPayload? p = JsonSerializer.Deserialize(
+            json,
+            VTubeStudioJsonContext.Default.TrackingStatusChangedEventPayload
+        );
         Assert.IsNotNull(p);
         Assert.IsTrue(p!.FaceFound);
         Assert.IsFalse(p.LeftHandFound);
@@ -68,10 +80,19 @@ public sealed class SerializationTests
     {
         ColorTintRequest req = new()
         {
-            ColorTint = new ColorTint { ColorR = 255, ColorG = 128, ColorB = 0, ColorA = 200 },
+            ColorTint = new ColorTint
+            {
+                ColorR = 255,
+                ColorG = 128,
+                ColorB = 0,
+                ColorA = 200,
+            },
             ArtMeshMatcher = new ArtMeshMatcher { NameContains = ["face"] },
         };
-        string json = JsonSerializer.Serialize(req, VTubeStudioJsonContext.Default.ColorTintRequest);
+        string json = JsonSerializer.Serialize(
+            req,
+            VTubeStudioJsonContext.Default.ColorTintRequest
+        );
         StringAssert.Contains(json, "\"colorR\":255");
         StringAssert.Contains(json, "\"nameContains\":[\"face\"]");
         StringAssert.Contains(json, "\"mixWithSceneLightingColor\":1");
@@ -81,7 +102,10 @@ public sealed class SerializationTests
     public void ApiErrorData_ParsesNumericErrorId()
     {
         const string json = """{"errorID":100,"message":"User denied"}""";
-        ApiErrorData? err = JsonSerializer.Deserialize(json, VTubeStudioJsonContext.Default.ApiErrorData);
+        ApiErrorData? err = JsonSerializer.Deserialize(
+            json,
+            VTubeStudioJsonContext.Default.ApiErrorData
+        );
         Assert.IsNotNull(err);
         Assert.AreEqual(100, err!.ErrorId);
         Assert.AreEqual("User denied", err.Message);
@@ -90,15 +114,25 @@ public sealed class SerializationTests
     [TestMethod]
     public void EventSubscriptionRequest_AcceptsTypedConfig()
     {
-        HotkeyTriggeredEventConfig cfg = new() { OnlyForAction = "TriggerAnimation", IgnoreHotkeysTriggeredByApi = true };
-        JsonElement el = JsonSerializer.SerializeToElement(cfg, VTubeStudioJsonContext.Default.HotkeyTriggeredEventConfig);
+        HotkeyTriggeredEventConfig cfg = new()
+        {
+            OnlyForAction = "TriggerAnimation",
+            IgnoreHotkeysTriggeredByApi = true,
+        };
+        JsonElement el = JsonSerializer.SerializeToElement(
+            cfg,
+            VTubeStudioJsonContext.Default.HotkeyTriggeredEventConfig
+        );
         EventSubscriptionRequest req = new()
         {
             EventName = VTubeStudioEventNames.HotkeyTriggered,
             Subscribe = true,
             Config = el,
         };
-        string json = JsonSerializer.Serialize(req, VTubeStudioJsonContext.Default.EventSubscriptionRequest);
+        string json = JsonSerializer.Serialize(
+            req,
+            VTubeStudioJsonContext.Default.EventSubscriptionRequest
+        );
         StringAssert.Contains(json, "\"eventName\":\"HotkeyTriggeredEvent\"");
         StringAssert.Contains(json, "\"onlyForAction\":\"TriggerAnimation\"");
         StringAssert.Contains(json, "\"ignoreHotkeysTriggeredByAPI\":true");

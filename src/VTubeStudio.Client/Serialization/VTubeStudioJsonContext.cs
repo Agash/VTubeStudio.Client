@@ -11,7 +11,8 @@ namespace VTubeStudio.Client.Serialization;
 [JsonSourceGenerationOptions(
     PropertyNameCaseInsensitive = true,
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-    GenerationMode = JsonSourceGenerationMode.Default)]
+    GenerationMode = JsonSourceGenerationMode.Default
+)]
 [JsonSerializable(typeof(VTubeStudioEnvelope))]
 [JsonSerializable(typeof(ApiErrorData))]
 [JsonSerializable(typeof(ApiStateResponse))]
