@@ -232,8 +232,10 @@ return 0;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-static void Log(string markup) =>
+static void Log(string markup)
+{
     AnsiConsole.MarkupLine($"[grey]{DateTimeOffset.Now:HH:mm:ss}[/]  {markup}");
+}
 
 static async Task RenderOverviewAsync(VTubeStudioClient client)
 {

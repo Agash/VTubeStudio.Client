@@ -1,4 +1,3 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VTubeStudio.Client.Messages;
 
 namespace VTubeStudio.Client.Tests;

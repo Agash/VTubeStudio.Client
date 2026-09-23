@@ -1,27 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <!-- The runtime pack is what a self-contained/AOT publish resolves, and the graph flags any
-         10.0.10 or older. Pin the serviced patch so the sample does not carry a known advisory. -->
-    <RuntimeFrameworkVersion Condition="'$(TargetFramework)' == 'net10.0'"
-      >10.0.11</RuntimeFrameworkVersion>
+    <TargetFramework>net11.0</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>VTubeStudio.Client.Sample</RootNamespace>
     <IsPackable>false</IsPackable>
     <!-- Verify the lib is genuinely native-AOT and trim-safe by publishing the sample with both enabled. -->
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Sample app: not shipped; don't gate the build on code-style analyzers. -->
-    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\VTubeStudio.Client\VTubeStudio.Client.csproj" />
     <ProjectReference Include="..\..\src\VTubeStudio.Client.DependencyInjection\VTubeStudio.Client.DependencyInjection.csproj" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Spectre.Console" />
   </ItemGroup>
 </Project>

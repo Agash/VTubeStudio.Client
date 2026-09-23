@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VTubeStudio.Client.DependencyInjection;
 
 namespace VTubeStudio.Client.Tests;
