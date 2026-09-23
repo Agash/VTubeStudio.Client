@@ -14,7 +14,8 @@ public static class VTubeStudioServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddVTubeStudioClient(
         this IServiceCollection services,
-        Action<VTubeStudioClientOptions> configure)
+        Action<VTubeStudioClientOptions> configure
+    )
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configure);
@@ -22,7 +23,9 @@ public static class VTubeStudioServiceCollectionExtensions
         _ = services.AddOptions<VTubeStudioClientOptions>().Configure(configure);
         services.TryAddSingleton<VTubeStudioClient>(static sp =>
         {
-            VTubeStudioClientOptions options = sp.GetRequiredService<IOptions<VTubeStudioClientOptions>>().Value;
+            VTubeStudioClientOptions options = sp.GetRequiredService<
+                IOptions<VTubeStudioClientOptions>
+            >().Value;
             ILogger<VTubeStudioClient>? logger = sp.GetService<ILogger<VTubeStudioClient>>();
             return new VTubeStudioClient(options, logger);
         });

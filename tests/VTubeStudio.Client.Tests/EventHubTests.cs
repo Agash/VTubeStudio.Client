@@ -15,7 +15,9 @@ public sealed class EventHubTests
         HotkeyTriggeredEventPayload? received = null;
         using IDisposable _ = hub.On<HotkeyTriggeredEventPayload>(p => received = p);
 
-        JsonElement raw = JsonElement.Parse("""{"hotkeyID":"x","hotkeyName":"W","hotkeyTriggeredByAPI":true}""");
+        JsonElement raw = JsonElement.Parse(
+            """{"hotkeyID":"x","hotkeyName":"W","hotkeyTriggeredByAPI":true}"""
+        );
         hub.Dispatch(HotkeyTriggeredEventPayload.EventName, raw);
 
         Assert.IsNotNull(received);
@@ -32,9 +34,12 @@ public sealed class EventHubTests
         using IDisposable _ = hub.On<ModelLoadedEventPayload>(
             "CustomEvent",
             p => received = p,
-            VTubeStudioJsonContext.Default.ModelLoadedEventPayload);
+            VTubeStudioJsonContext.Default.ModelLoadedEventPayload
+        );
 
-        JsonElement raw = JsonElement.Parse("""{"modelLoaded":true,"modelName":"M","modelID":"id-1"}""");
+        JsonElement raw = JsonElement.Parse(
+            """{"modelLoaded":true,"modelName":"M","modelID":"id-1"}"""
+        );
         hub.Dispatch("CustomEvent", raw);
 
         Assert.IsNotNull(received);

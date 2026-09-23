@@ -27,5 +27,4 @@
   <ItemGroup>
     <InternalsVisibleTo Include="VTubeStudio.Client.Tests" />
   </ItemGroup>
-
 </Project>

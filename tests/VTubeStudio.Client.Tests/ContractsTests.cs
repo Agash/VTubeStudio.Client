@@ -40,18 +40,40 @@ public sealed class ContractsTests
         Assert.AreEqual(0, new ItemUnloadRequest().InstanceIds.Count);
         Assert.AreEqual(0, new ItemUnloadRequest().FileNames.Count);
         Assert.AreEqual("set", new InjectParameterDataRequest { ParameterValues = [] }.Mode);
-        Assert.AreEqual(0, new AvailableHotkey { Name = "n", Type = "t", HotkeyId = "id" }.KeyCombination.Count);
+        Assert.AreEqual(
+            0,
+            new AvailableHotkey
+            {
+                Name = "n",
+                Type = "t",
+                HotkeyId = "id",
+            }
+                .KeyCombination
+                .Count
+        );
     }
 
     [TestMethod]
     public void EventPayloads_ExposeWireNameAndTypeInfo()
     {
         Assert.AreEqual(VTubeStudioEventNames.ModelLoaded, ModelLoadedEventPayload.EventName);
-        Assert.AreEqual(VTubeStudioEventNames.TrackingStatusChanged, TrackingStatusChangedEventPayload.EventName);
-        Assert.AreEqual(VTubeStudioEventNames.BackgroundChanged, BackgroundChangedEventPayload.EventName);
-        Assert.AreEqual(VTubeStudioEventNames.ModelConfigChanged, ModelConfigChangedEventPayload.EventName);
+        Assert.AreEqual(
+            VTubeStudioEventNames.TrackingStatusChanged,
+            TrackingStatusChangedEventPayload.EventName
+        );
+        Assert.AreEqual(
+            VTubeStudioEventNames.BackgroundChanged,
+            BackgroundChangedEventPayload.EventName
+        );
+        Assert.AreEqual(
+            VTubeStudioEventNames.ModelConfigChanged,
+            ModelConfigChangedEventPayload.EventName
+        );
         Assert.AreEqual(VTubeStudioEventNames.ModelMoved, ModelMovedEventPayload.EventName);
-        Assert.AreEqual(VTubeStudioEventNames.HotkeyTriggered, HotkeyTriggeredEventPayload.EventName);
+        Assert.AreEqual(
+            VTubeStudioEventNames.HotkeyTriggered,
+            HotkeyTriggeredEventPayload.EventName
+        );
         Assert.AreEqual(VTubeStudioEventNames.ModelAnimation, ModelAnimationEventPayload.EventName);
         Assert.AreEqual(VTubeStudioEventNames.Item, ItemEventPayload.EventName);
         Assert.AreEqual(VTubeStudioEventNames.ModelClicked, ModelClickedEventPayload.EventName);
@@ -93,7 +115,10 @@ public sealed class ContractsTests
     [DataRow(VTubeStudioErrorId.ModelIdMissing, 150)]
     [DataRow(VTubeStudioErrorId.CannotCurrentlyChangeModel, 154)]
     [DataRow(VTubeStudioErrorId.HotkeyQueueFull, 200)]
-    [DataRow(VTubeStudioErrorId.HotkeyExecutionFailedBecauseLive2DItemsDoNotSupportThisHotkeyType, 208)]
+    [DataRow(
+        VTubeStudioErrorId.HotkeyExecutionFailedBecauseLive2DItemsDoNotSupportThisHotkeyType,
+        208
+    )]
     [DataRow(VTubeStudioErrorId.ColorTintRequestNoModelLoaded, 250)]
     [DataRow(VTubeStudioErrorId.ColorTintRequestInvalidColorValue, 252)]
     [DataRow(VTubeStudioErrorId.MoveModelRequestNoModelLoaded, 300)]
@@ -171,26 +196,24 @@ public sealed class ContractsTests
     public void Client_RejectsInvalidOptions()
     {
         Assert.ThrowsExactly<ArgumentNullException>(() => _ = new VTubeStudioClient(null!));
-        Assert.ThrowsExactly<ArgumentException>(() => _ = new VTubeStudioClient(new VTubeStudioClientOptions
-        {
-            PluginName = string.Empty,
-            PluginDeveloper = "Dev",
-        }));
-        Assert.ThrowsExactly<ArgumentException>(() => _ = new VTubeStudioClient(new VTubeStudioClientOptions
-        {
-            PluginName = "Plugin",
-            PluginDeveloper = "  ",
-        }));
+        Assert.ThrowsExactly<ArgumentException>(() =>
+            _ = new VTubeStudioClient(
+                new VTubeStudioClientOptions { PluginName = string.Empty, PluginDeveloper = "Dev" }
+            )
+        );
+        Assert.ThrowsExactly<ArgumentException>(() =>
+            _ = new VTubeStudioClient(
+                new VTubeStudioClientOptions { PluginName = "Plugin", PluginDeveloper = "  " }
+            )
+        );
     }
 
     [TestMethod]
     public async Task Client_StartsDisconnectedAndDisposesIdempotently()
     {
-        VTubeStudioClient client = new(new VTubeStudioClientOptions
-        {
-            PluginName = "Plugin",
-            PluginDeveloper = "Dev",
-        });
+        VTubeStudioClient client = new(
+            new VTubeStudioClientOptions { PluginName = "Plugin", PluginDeveloper = "Dev" }
+        );
         Assert.IsFalse(client.IsConnected);
 
         await client.DisconnectAsync();
@@ -202,11 +225,7 @@ public sealed class ContractsTests
     [TestMethod]
     public void ClientOptions_HaveDocumentedDefaults()
     {
-        VTubeStudioClientOptions options = new()
-        {
-            PluginName = "Plugin",
-            PluginDeveloper = "Dev",
-        };
+        VTubeStudioClientOptions options = new() { PluginName = "Plugin", PluginDeveloper = "Dev" };
 
         Assert.AreEqual(VTubeStudioApi.DefaultEndpoint, options.Endpoint);
         Assert.AreEqual(TimeSpan.FromSeconds(10), options.RequestTimeout);
@@ -217,31 +236,37 @@ public sealed class ContractsTests
     [TestMethod]
     public async Task Client_RequiresConnectionForRequests()
     {
-        await using VTubeStudioClient client = new(new VTubeStudioClientOptions
-        {
-            PluginName = "Plugin",
-            PluginDeveloper = "Dev",
-        });
+        await using VTubeStudioClient client = new(
+            new VTubeStudioClientOptions { PluginName = "Plugin", PluginDeveloper = "Dev" }
+        );
 
         await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.GetApiStateAsync());
-        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => client.SubscribeAsync("TestEvent"));
         await Assert.ThrowsExactlyAsync<InvalidOperationException>(() =>
-            client.GetParameterValueAsync(new ParameterValueRequest { Name = "FaceAngleX" }));
+            client.SubscribeAsync("TestEvent")
+        );
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() =>
+            client.GetParameterValueAsync(new ParameterValueRequest { Name = "FaceAngleX" })
+        );
     }
 
     [TestMethod]
     public async Task Client_ValidatesArgumentsBeforeConnecting()
     {
-        await using VTubeStudioClient client = new(new VTubeStudioClientOptions
-        {
-            PluginName = "Plugin",
-            PluginDeveloper = "Dev",
-        });
+        await using VTubeStudioClient client = new(
+            new VTubeStudioClientOptions { PluginName = "Plugin", PluginDeveloper = "Dev" }
+        );
 
-        Assert.ThrowsExactly<ArgumentException>(() => { _ = client.AuthenticateAsync(string.Empty); });
+        Assert.ThrowsExactly<ArgumentException>(() =>
+        {
+            _ = client.AuthenticateAsync(string.Empty);
+        });
         Assert.ThrowsExactly<ArgumentNullException>(() =>
         {
-            _ = client.SubscribeWithConfigAsync<TestEventConfig>("TestEvent", null!, VTubeStudioJsonContext.Default.TestEventConfig);
+            _ = client.SubscribeWithConfigAsync<TestEventConfig>(
+                "TestEvent",
+                null!,
+                VTubeStudioJsonContext.Default.TestEventConfig
+            );
         });
         Assert.ThrowsExactly<ArgumentNullException>(() =>
         {

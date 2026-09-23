@@ -24,5 +24,4 @@
     <PackageReference Include="MinVer" PrivateAssets="all" />
     <PackageReference Include="DotNet.ReproducibleBuilds" PrivateAssets="all" />
   </ItemGroup>
-
 </Project>

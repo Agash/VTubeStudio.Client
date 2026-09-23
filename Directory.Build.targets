@@ -1,5 +1,4 @@
 <Project>
-
   <!-- These settings are intentionally in Directory.Build.targets, not .props: $(IsPackable)
        is assigned inside each csproj body, which is evaluated AFTER Directory.Build.props but
        BEFORE Directory.Build.targets. Keying them off $(IsPackable) in .props silently no-ops
@@ -14,7 +13,11 @@
 
   <!-- Every packable project ships the repo README, so each csproj doesn't repeat itself. -->
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
-    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" />
+    <None
+      Include="$(MSBuildThisFileDirectory)README.md"
+      Pack="true"
+      PackagePath="\"
+      Visible="false"
+    />
   </ItemGroup>
-
 </Project>

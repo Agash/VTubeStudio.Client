@@ -14,7 +14,9 @@ public sealed class DependencyInjectionTests
     public void AddClient_ValidatesArguments()
     {
         ServiceCollection services = new();
-        Assert.ThrowsExactly<ArgumentNullException>(() => VTubeStudioServiceCollectionExtensions.AddVTubeStudioClient(null!, _ => { }));
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+            VTubeStudioServiceCollectionExtensions.AddVTubeStudioClient(null!, _ => { })
+        );
         Assert.ThrowsExactly<ArgumentNullException>(() => services.AddVTubeStudioClient(null!));
     }
 

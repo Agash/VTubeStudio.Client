@@ -11,18 +11,22 @@ namespace VTubeStudio.Client.Tests;
 [TestClass]
 public sealed class ReceiveLoopTests
 {
-    private static VTubeStudioClient CreateClient() => new(new VTubeStudioClientOptions
-    {
-        PluginName = "ReceiveLoopTests",
-        PluginDeveloper = "Tests",
-    });
+    private static VTubeStudioClient CreateClient() =>
+        new(
+            new VTubeStudioClientOptions
+            {
+                PluginName = "ReceiveLoopTests",
+                PluginDeveloper = "Tests",
+            }
+        );
 
     private static List<VTubeStudioEventArgs> CaptureRaw(VTubeStudioClient client)
     {
         List<VTubeStudioEventArgs> seen = [];
         client.EventReceived += (_, e) =>
         {
-            lock (seen) seen.Add(e);
+            lock (seen)
+                seen.Add(e);
         };
         return seen;
     }
@@ -30,13 +34,22 @@ public sealed class ReceiveLoopTests
     // Event frames carry a requestID.
     private static string ModelLoadedFrame(string? requestId)
     {
-        string requestIdField = requestId is null ? string.Empty : "\"requestID\":\"" + requestId + "\",";
-        return "{\"apiName\":\"VTubeStudioPublicAPI\",\"apiVersion\":\"1.0\",\"timestamp\":1788683673093,\"messageType\":\"ModelLoadedEvent\"," + requestIdField + "\"data\":{\"modelLoaded\":true,\"modelName\":\"akari\",\"modelID\":\"8e015e806a144842845b8b98fe3b7ec9\"}}";
+        string requestIdField = requestId is null
+            ? string.Empty
+            : "\"requestID\":\"" + requestId + "\",";
+        return "{\"apiName\":\"VTubeStudioPublicAPI\",\"apiVersion\":\"1.0\",\"timestamp\":1788683673093,\"messageType\":\"ModelLoadedEvent\","
+            + requestIdField
+            + "\"data\":{\"modelLoaded\":true,\"modelName\":\"akari\",\"modelID\":\"8e015e806a144842845b8b98fe3b7ec9\"}}";
     }
 
-    private static TaskCompletionSource<VTubeStudioEnvelope> AddPending(VTubeStudioClient client, string requestId)
+    private static TaskCompletionSource<VTubeStudioEnvelope> AddPending(
+        VTubeStudioClient client,
+        string requestId
+    )
     {
-        TaskCompletionSource<VTubeStudioEnvelope> tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource<VTubeStudioEnvelope> tcs = new(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
         Assert.IsTrue(client._pending.TryAdd(requestId, tcs));
         return tcs;
     }
@@ -82,7 +95,8 @@ public sealed class ReceiveLoopTests
         List<VTubeStudioEventArgs> raw = CaptureRaw(client);
 
         client.DispatchMessage(
-            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683670457,"messageType":"TestEvent","requestID":"7d0cecae33d94900bc0a32758988dc02","data":{"yourTestMessage":"diag123","counter":1360}}""");
+            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683670457,"messageType":"TestEvent","requestID":"7d0cecae33d94900bc0a32758988dc02","data":{"yourTestMessage":"diag123","counter":1360}}"""
+        );
 
         Assert.AreEqual(1, raw.Count);
         Assert.AreEqual("TestEvent", raw[0].EventName);
@@ -112,7 +126,8 @@ public sealed class ReceiveLoopTests
         TaskCompletionSource<VTubeStudioEnvelope> tcs = AddPending(client, "42");
 
         client.DispatchMessage(
-            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683667733,"messageType":"StatisticsResponse","requestID":"42","data":{"uptime":1439384,"framerate":73}}""");
+            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683667733,"messageType":"StatisticsResponse","requestID":"42","data":{"uptime":1439384,"framerate":73}}"""
+        );
 
         VTubeStudioEnvelope response = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
         Assert.AreEqual("StatisticsResponse", response.MessageType);
@@ -126,7 +141,8 @@ public sealed class ReceiveLoopTests
         List<VTubeStudioEventArgs> raw = CaptureRaw(client);
 
         client.DispatchMessage(
-            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683667733,"messageType":"StatisticsResponse","requestID":"no-such-request","data":{}}""");
+            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683667733,"messageType":"StatisticsResponse","requestID":"no-such-request","data":{}}"""
+        );
 
         Assert.AreEqual(0, raw.Count);
         Assert.AreEqual(0, client._pending.Count);
@@ -141,7 +157,8 @@ public sealed class ReceiveLoopTests
         Assert.IsTrue(client._pending.TryRemove("43", out _));
 
         client.DispatchMessage(
-            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683667733,"messageType":"StatisticsResponse","requestID":"43","data":{}}""");
+            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683667733,"messageType":"StatisticsResponse","requestID":"43","data":{}}"""
+        );
 
         Assert.AreEqual(0, raw.Count);
         Assert.IsFalse(tcs.Task.IsCompleted);
@@ -155,7 +172,8 @@ public sealed class ReceiveLoopTests
         TaskCompletionSource<VTubeStudioEnvelope> tcs = AddPending(client, "7");
 
         client.DispatchMessage(
-            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683669792,"messageType":"EventSubscriptionResponse","requestID":"7","data":{"subscribedEventCount":2,"subscribedEvents":["TestEvent","ModelLoadedEvent"]}}""");
+            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683669792,"messageType":"EventSubscriptionResponse","requestID":"7","data":{"subscribedEventCount":2,"subscribedEvents":["TestEvent","ModelLoadedEvent"]}}"""
+        );
 
         VTubeStudioEnvelope response = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
         Assert.AreEqual("EventSubscriptionResponse", response.MessageType);
@@ -170,7 +188,8 @@ public sealed class ReceiveLoopTests
         TaskCompletionSource<VTubeStudioEnvelope> tcs = AddPending(client, "9");
 
         client.DispatchMessage(
-            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683669759,"messageType":"APIError","requestID":"9","data":{"errorID":50,"message":"User has denied API access for your plugin."}}""");
+            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683669759,"messageType":"APIError","requestID":"9","data":{"errorID":50,"message":"User has denied API access for your plugin."}}"""
+        );
 
         VTubeStudioEnvelope response = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
         Assert.AreEqual("APIError", response.MessageType);
@@ -197,7 +216,8 @@ public sealed class ReceiveLoopTests
         using IDisposable _ = client.Events.On<ModelLoadedEventPayload>(p => received = p);
 
         client.DispatchMessage(
-            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683672660,"messageType":"ModelLoadedEvent","requestID":"550e8400e29b41d4a716446655440000","data":{"modelLoaded":false,"modelName":"hiyori","modelID":"03b8d2c93593474b8ee0a50e3c43316d"}}""");
+            """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683672660,"messageType":"ModelLoadedEvent","requestID":"550e8400e29b41d4a716446655440000","data":{"modelLoaded":false,"modelName":"hiyori","modelID":"03b8d2c93593474b8ee0a50e3c43316d"}}"""
+        );
 
         Assert.IsNotNull(received);
         Assert.IsFalse(received!.ModelLoaded);
@@ -223,7 +243,9 @@ public sealed class ReceiveLoopTests
         const string json =
             """{"apiName":"VTubeStudioPublicAPI","apiVersion":"1.0","timestamp":1788683673093,"messageType":"ModelLoadedEvent","requestID":"8afcc7c8f496475d8243158a51516b21","data":{"modelLoaded":true,"modelName":"akari","modelID":"8e015e806a144842845b8b98fe3b7ec9"}}""";
         VTubeStudioEnvelope? env = JsonSerializer.Deserialize(
-            json, Serialization.VTubeStudioJsonContext.Default.VTubeStudioEnvelope);
+            json,
+            Serialization.VTubeStudioJsonContext.Default.VTubeStudioEnvelope
+        );
 
         Assert.IsNotNull(env);
         Assert.AreEqual("ModelLoadedEvent", env!.MessageType);

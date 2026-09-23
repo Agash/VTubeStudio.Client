@@ -14,7 +14,9 @@ namespace VTubeStudio.Client.Events;
 /// </summary>
 public sealed class VTubeStudioEventHub
 {
-    private readonly ConcurrentDictionary<string, List<TypedHandler>> _handlers = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, List<TypedHandler>> _handlers = new(
+        StringComparer.Ordinal
+    );
 
     /// <summary>
     /// Subscribe a typed handler. Works with any payload type that implements
@@ -34,7 +36,11 @@ public sealed class VTubeStudioEventHub
     /// <see cref="IVTubeStudioEvent{TSelf}"/>; for everything the library ships, prefer
     /// <see cref="On{TPayload}(Action{TPayload})"/>.
     /// </summary>
-    public IDisposable On<TPayload>(string eventName, Action<TPayload> handler, JsonTypeInfo<TPayload> typeInfo)
+    public IDisposable On<TPayload>(
+        string eventName,
+        Action<TPayload> handler,
+        JsonTypeInfo<TPayload> typeInfo
+    )
         where TPayload : class
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(eventName);
@@ -43,17 +49,26 @@ public sealed class VTubeStudioEventHub
         return OnCore(eventName, handler, typeInfo);
     }
 
-    private Subscription OnCore<TPayload>(string eventName, Action<TPayload> handler, JsonTypeInfo<TPayload> typeInfo)
+    private Subscription OnCore<TPayload>(
+        string eventName,
+        Action<TPayload> handler,
+        JsonTypeInfo<TPayload> typeInfo
+    )
         where TPayload : class
     {
-        TypedHandler typed = new(eventName, data =>
-        {
-            TPayload? payload = data.Deserialize(typeInfo);
-            if (payload is not null) handler(payload);
-        });
+        TypedHandler typed = new(
+            eventName,
+            data =>
+            {
+                TPayload? payload = data.Deserialize(typeInfo);
+                if (payload is not null)
+                    handler(payload);
+            }
+        );
 
         List<TypedHandler> bucket = _handlers.GetOrAdd(eventName, _ => []);
-        lock (bucket) bucket.Add(typed);
+        lock (bucket)
+            bucket.Add(typed);
         return new Subscription(this, eventName, typed);
     }
 
@@ -65,7 +80,8 @@ public sealed class VTubeStudioEventHub
             return;
         }
         TypedHandler[] snapshot;
-        lock (bucket) snapshot = [.. bucket];
+        lock (bucket)
+            snapshot = [.. bucket];
         foreach (TypedHandler handler in snapshot)
         {
             handler.Invoke(data);
@@ -76,13 +92,18 @@ public sealed class VTubeStudioEventHub
     {
         if (_handlers.TryGetValue(eventName, out List<TypedHandler>? bucket))
         {
-            lock (bucket) _ = bucket.Remove(handler);
+            lock (bucket)
+                _ = bucket.Remove(handler);
         }
     }
 
     private sealed record TypedHandler(string EventName, Action<JsonElement> Invoke);
 
-    private sealed class Subscription(VTubeStudioEventHub hub, string eventName, TypedHandler handler) : IDisposable
+    private sealed class Subscription(
+        VTubeStudioEventHub hub,
+        string eventName,
+        TypedHandler handler
+    ) : IDisposable
     {
         public void Dispose() => hub.Remove(eventName, handler);
     }

@@ -7,23 +7,28 @@ namespace VTubeStudio.Client.Events;
 public sealed record EventSubscriptionRequest
 {
     /// <summary>The event to (un)subscribe; one of the values in <see cref="VTubeStudioEventNames"/>. Null unsubscribes from all events.</summary>
-    [JsonPropertyName("eventName")] public string? EventName { get; init; }
+    [JsonPropertyName("eventName")]
+    public string? EventName { get; init; }
 
     /// <summary>True to subscribe, false to unsubscribe.</summary>
-    [JsonPropertyName("subscribe")] public required bool Subscribe { get; init; }
+    [JsonPropertyName("subscribe")]
+    public required bool Subscribe { get; init; }
 
     /// <summary>Optional per-event configuration (see the <c>*EventConfig</c> records); null for no config.</summary>
-    [JsonPropertyName("config")] public JsonElement? Config { get; init; }
+    [JsonPropertyName("config")]
+    public JsonElement? Config { get; init; }
 }
 
 /// <summary>Payload of an <c>EventSubscriptionResponse</c>: the events the session is now subscribed to.</summary>
 public sealed record EventSubscriptionResponse
 {
     /// <summary>Number of events the session is currently subscribed to.</summary>
-    [JsonPropertyName("subscribedEventCount")] public int SubscribedEventCount { get; init; }
+    [JsonPropertyName("subscribedEventCount")]
+    public int SubscribedEventCount { get; init; }
 
     /// <summary>The names of the events the session is currently subscribed to.</summary>
-    [JsonPropertyName("subscribedEvents")] public IReadOnlyList<string> SubscribedEvents { get; init; } = [];
+    [JsonPropertyName("subscribedEvents")]
+    public IReadOnlyList<string> SubscribedEvents { get; init; } = [];
 }
 
 /// <summary>Well-known event-name constants used with <see cref="EventSubscriptionRequest"/>.</summary>
