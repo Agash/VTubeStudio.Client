@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VTubeStudio.Client.Events;
 using VTubeStudio.Client.Messages;
 
