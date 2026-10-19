@@ -7,6 +7,9 @@
     <IsPackable>false</IsPackable>
     <!-- Verify the lib is genuinely native-AOT and trim-safe by publishing the sample with both enabled. -->
     <PublishAot>true</PublishAot>
+    <!-- A native executable ships no XML docs. The Compile-only AOT publish (dotnet/sdk#54515) also
+         never copies them into OutDir, where publish looks (MSB3030). -->
+    <PublishDocumentationFiles>false</PublishDocumentationFiles>
     <InvariantGlobalization>true</InvariantGlobalization>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Sample app: not shipped; don't gate the build on code-style analyzers. -->
