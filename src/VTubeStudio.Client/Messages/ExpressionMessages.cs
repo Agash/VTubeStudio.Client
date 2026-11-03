@@ -105,6 +105,13 @@ public sealed record ExpressionActivationRequest
     [JsonPropertyName("expressionFile")]
     public required string ExpressionFile { get; init; }
 
+    /// <summary>
+    /// Fade-in time in seconds, clamped by VTube Studio to 0 to 2; null uses its default of 0.25. Fading out
+    /// always takes the fade-in's time.
+    /// </summary>
+    [JsonPropertyName("fadeTime")]
+    public double? FadeTime { get; init; }
+
     /// <summary>True to activate the expression, false to deactivate it.</summary>
     [JsonPropertyName("active")]
     public required bool Active { get; init; }
